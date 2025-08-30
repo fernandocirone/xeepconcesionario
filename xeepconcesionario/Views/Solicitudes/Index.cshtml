@@ -1,0 +1,340 @@
+﻿@model IEnumerable<Solicitud>
+@using Microsoft.AspNetCore.Routing
+
+@{
+    ViewData["Title"] = "Solicitudes";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex flex-column" style="height: 80vh;">
+        <!-- Encabezado + Filtros -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="text-primary m-0">SOLICITUDES</h2>
+
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <input type="text" class="form-control form-control-sm" id="filtroCliente" placeholder="Buscar por cliente" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#filtroModal">
+                    <i class="bi bi-funnel-fill"></i> Filtros
+                </button>
+
+
+                @{
+                    var route = new RouteValueDictionary();
+                    foreach (var kv in Context.Request.Query)
+                    {
+                        route[kv.Key] = kv.Value.ToString();
+                    }
+                }
+                <a class="btn btn-success"
+                   href="@Url.Action("ExportarExcel", "Solicitudes", route)">
+                    Exportar a Excel
+                </a>
+
+
+
+                <a asp-action="Create" class="btn btn-success btn-sm">
+                    <i class="bi bi-plus-circle"></i> Nueva Solicitud
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div id="tablaSolicitudes" class="table-responsive flex-grow-1 overflow-auto border rounded" style="min-height:0;">
+            @await Html.PartialAsync("_TablaSolicitudes", Model)
+        </div>
+
+
+
+        <!-- Botones fijos -->
+        <div class="mt-3 d-flex justify-content-end gap-2">
+            <button id="btnEliminar" class="btn btn-danger" disabled>Eliminar</button>
+            <button id="btnEditar" class="btn btn-warning" disabled>Editar</button>
+            <button id="btnDetalles" class="btn btn-secondary" disabled>Detalles</button>
+            <button id="btnCuotas" class="btn btn-primary" disabled>Cuotas</button>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Solicitud (iframe) -->
+    <div class="modal fade" id="modalCrearSolicitud" tabindex="-1" aria-labelledby="modalCrearSolicitudLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalCrearSolicitudLabel">Nueva Solicitud</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <iframe id="iframeCrearSolicitud" src="about:blank" style="width:100%;height:80vh;border:0;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Filtros -->
+    <div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form method="get" asp-action="Index">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filtroModalLabel">Filtrar Solicitudes</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+
+                            <!-- Identificación del cliente -->
+                            <div class="col-12">
+                                <h6 class="text-secondary mb-2">Cliente</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Nro. Solicitud</label>
+                                        <input type="text" class="form-control" name="numeroSolicitud"
+                                               value="@ViewBag.NumeroSolicitud" placeholder="Numero Solicitud" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Cliente</label>
+                                        <input type="text" class="form-control" name="clienteNombre"
+                                               value="@ViewBag.ClienteNombre" placeholder="Apellido y nombre" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">DNI</label>
+                                        <input type="text" class="form-control" name="dni"
+                                               value="@ViewBag.Dni" placeholder="Solo números" inputmode="numeric" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ubicación -->
+                            <div class="col-12">
+                                <h6 class="text-secondary mb-2 mt-2">Ubicación</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Provincia</label>
+                                        <input type="text" class="form-control" name="provincia"
+                                               value="@ViewBag.Provincia" placeholder="Nombre de provincia" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Localidad</label>
+                                        <input type="text" class="form-control" name="localidad"
+                                               value="@ViewBag.Localidad" placeholder="Nombre de localidad" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Región</label>
+                                        <input type="text" class="form-control" name="region"
+                                               value="@ViewBag.Region" placeholder="Nombre de región" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Equipo comercial -->
+                            <div class="col-12">
+                                <h6 class="text-secondary mb-2 mt-2">Equipo</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Vendedor</label>
+                                        <input type="text" class="form-control" name="vendedorNombre"
+                                               value="@ViewBag.VendedorNombre" placeholder="Nombre vendedor" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Supervisor</label>
+                                        <input type="text" class="form-control" name="supervisorNombre"
+                                               value="@ViewBag.SupervisorNombre" placeholder="Nombre supervisor" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Jefe de Ventas</label>
+                                        <input type="text" class="form-control" name="jefeVentasNombre"
+                                               value="@ViewBag.JefeVentasNombre" placeholder="Nombre jefe de ventas" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Operación -->
+                            <div class="col-12">
+                                <h6 class="text-secondary mb-2 mt-2">Operación</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Automóvil (código o modelo)</label>
+                                        <input type="text" class="form-control" name="PlanTexto"
+                                               value="@ViewBag.PlanTexto" placeholder="Ej: 208, COROLLA, ABC123" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Número de sorteo</label>
+                                        <input type="text" class="form-control" name="numeroSorteo"
+                                               value="@ViewBag.NumeroSorteo" placeholder="Exacto" inputmode="numeric" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Estado (ID)</label>
+                                        <select class="form-select" name="estadoId" asp-items="ViewBag.EstadoId">
+                                            <option value="">-- Todos --</option>
+                                        </select>
+                                        <small class="text-muted">Si elegís un ID, ignora el filtro por nombre.</small>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Estado (nombre)</label>
+                                        <input type="text" class="form-control" name="estado"
+                                               value="@ViewBag.EstadoNombre" placeholder="Ej: ACTIVA, BAJA..." />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Condición de venta</label>
+                                        <select class="form-select" name="condicionVentaId" asp-items="ViewBag.CondicionVentaId">
+                                            <option value="">-- Todas --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Tipo de baja</label>
+                                        <select class="form-select" name="tipoBajaId" asp-items="ViewBag.TipoBajaId">
+                                            <option value="">-- Todos --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fechas -->
+                            <div class="col-12">
+                                <h6 class="text-secondary mb-2 mt-2">Fechas</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Fecha de carga desde</label>
+                                        <input type="date" class="form-control" name="fechaCargaDesde"
+                                               value="@(ViewBag.FechaCargaDesde is DateTime d1 ? d1.ToString("yyyy-MM-dd") : "")" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Fecha de carga hasta</label>
+                                        <input type="date" class="form-control" name="fechaCargaHasta"
+                                               value="@(ViewBag.FechaCargaHasta is DateTime d2 ? d2.ToString("yyyy-MM-dd") : "")" />
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <a class="btn btn-outline-secondary" href="@Url.Action("Index","Solicitudes")">Limpiar</a>
+                        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        let idSeleccionado = null;
+
+        // Utilidad: habilitar/deshabilitar botones en bloque
+        function setBotones(enabled) {
+            const btns = [
+                document.getElementById('btnEditar'),
+                document.getElementById('btnEliminar'),
+                document.getElementById('btnCuotas'),
+                document.getElementById('btnDetalles')
+            ];
+            btns.forEach(b => { if (b) b.disabled = !enabled; });
+        }
+
+        // Limpia el resaltado de todas las filas
+        function limpiarSeleccionVisual() {
+            document.querySelectorAll('.fila-solicitud').forEach(f => f.classList.remove('table-primary'));
+        }
+
+        // Marca selección en UI + guarda id
+        function seleccionarFila(fila) {
+            if (!fila) return;
+            limpiarSeleccionVisual();
+            fila.classList.add('table-primary');
+            idSeleccionado = fila.dataset.id || null;
+
+            // Si hay un radio en la fila, marcarlo
+            const radio = fila.querySelector('input.seleccionar[type="radio"]');
+            if (radio && !radio.checked) radio.checked = true;
+
+            setBotones(!!idSeleccionado);
+        }
+
+        // Delegación de eventos para seleccionar fila (sirve también tras reemplazar el tbody)
+        document.getElementById('tablaSolicitudes')?.addEventListener('click', (ev) => {
+            const fila = ev.target.closest('.fila-solicitud');
+            if (!fila) return;
+            seleccionarFila(fila);
+        });
+
+        // Si cambia explícitamente un radio de selección
+        document.getElementById('tablaSolicitudes')?.addEventListener('change', (ev) => {
+            const radio = ev.target.closest('input.seleccionar[type="radio"]');
+            if (!radio) return;
+            const fila = radio.closest('.fila-solicitud');
+            seleccionarFila(fila);
+        });
+
+        // Navegación de acciones
+        document.getElementById('btnEditar')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Solicitudes/Edit/${idSeleccionado}`;
+        });
+        document.getElementById('btnEliminar')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Solicitudes/Delete/${idSeleccionado}`;
+        });
+        document.getElementById('btnCuotas')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Cuotas/Index?solicitudId=${idSeleccionado}`;
+        });
+        document.getElementById('btnDetalles')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Solicitudes/Details/${idSeleccionado}`;
+        });
+
+        // Debounce utilitario
+        const debounce = (callback, delay = 300) => {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => callback(...args), delay);
+            };
+        };
+
+        // Búsqueda live
+        const buscarSolicitudes = debounce(() => {
+            const cliente = document.getElementById('filtroCliente')?.value ?? '';
+            const estado = document.getElementById('filtroSolicitud')?.value ?? '';
+
+            // Usar URLSearchParams evita typos y hace el código más claro
+            const params = new URLSearchParams({ cliente, estado });
+
+            fetch(`/Solicitudes/FiltrarSolicitudes?${params.toString()}`)
+                .then(res => res.text())
+                .then(html => {
+                    // IMPORTANTE:
+                    // - Si tu endpoint devuelve SOLO <tr>...</tr> (filas), reemplazamos el <tbody>.
+                    // - Si devuelve la tabla completa, cambiale este target al contenedor externo.
+                    const tbody = document.querySelector('#tablaSolicitudes tbody');
+                    if (tbody) {
+                        tbody.innerHTML = html;
+                    } else {
+                        // fallback por si no hay <tbody>
+                        document.getElementById('tablaSolicitudes').innerHTML = html;
+                    }
+
+                    // resetear selección tras el filtro
+                    idSeleccionado = null;
+                    setBotones(false);
+                })
+                .catch(console.error);
+        }, 300);
+
+        document.getElementById('filtroCliente')?.addEventListener('input', buscarSolicitudes);
+        document.getElementById('filtroSolicitud')?.addEventListener('input', buscarSolicitudes);
+
+        // Estado inicial: sin selección
+        setBotones(false);
+    </script>
+}

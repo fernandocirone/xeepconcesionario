@@ -1,0 +1,124 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <h3>Crear Nuevo Usuario</h3>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label asp-for="Input.Email">Email</label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.Password">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.ConfirmPassword">Confirmar Password</label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tipos de usuario</label>
+                <select asp-for="Input.TiposUsuarioIds"
+                        asp-items="Model.TiposUsuario"
+                        class="form-select"
+                        multiple>
+                </select>
+                <span asp-validation-for="Input.TiposUsuarioIds" class="text-danger"></span>
+            </div>
+
+
+            <!-- Opcionales de perfil -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.NombreCompleto" class="form-control" placeholder="Nombre completo" />
+                <label asp-for="Input.NombreCompleto">Nombre completo</label>
+                <span asp-validation-for="Input.NombreCompleto" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Telefono" class="form-control" placeholder="Teléfono" />
+                <label asp-for="Input.Telefono">Teléfono</label>
+                <span asp-validation-for="Input.Telefono" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Direccion" class="form-control" placeholder="Dirección" />
+                <label asp-for="Input.Direccion">Dirección</label>
+                <span asp-validation-for="Input.Direccion" class="text-danger"></span>
+            </div>
+
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
+        </form>
+    </div>
+
+    <div class="col-md-8">
+        <section>
+            <h3>Usuarios Existentes</h3>
+            <hr />
+            <table class="table table-bordered table-sm align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th style="width:120px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.UsuariosExistentes?.Any() == true)
+                    {
+                        foreach (var u in Model.UsuariosExistentes)
+                        {
+                            <tr>
+                                <td>@u?.Email</td>
+                                <td>
+                                    @{
+                                        var tipos = u?.TiposUsuario?
+                                        .Where(tu => tu.TipoUsuario != null)
+                                        .Select(tu => tu.TipoUsuario.Nombretipousuario)
+                                        .ToList() ?? new List<string>();
+
+                                        @string.Join(", ", tipos.Any() ? tipos : new List<string> { "-" })
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-area="Identity"
+                                       asp-page="/Account/EditUserModel"
+                                       asp-route-id="@u.Id"
+                                       class="btn btn-sm btn-primary">
+                                        Editar
+                                    </a>
+
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">Sin usuarios</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

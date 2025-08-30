@@ -1,0 +1,46 @@
+﻿@model Plan
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Codigo" class="form-label"></label>
+        <input asp-for="Codigo" class="form-control" />
+        <span asp-validation-for="Codigo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Modelo" class="form-label"></label>
+        <input asp-for="Modelo" class="form-control" />
+        <span asp-validation-for="Modelo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CuotaApertura" class="form-label"></label>
+        <input asp-for="CuotaApertura" class="form-control" />
+        <span asp-validation-for="CuotaApertura" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AdelantoMensual" class="form-label"></label>
+        <input asp-for="AdelantoMensual" class="form-control" />
+        <span asp-validation-for="AdelantoMensual" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Sellado" class="form-label"></label>
+        <input asp-for="Sellado" class="form-control" />
+        <span asp-validation-for="Sellado" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CuotaIngreso" class="form-label"></label>
+        <input asp-for="CuotaIngreso" class="form-control" />
+        <span asp-validation-for="CuotaIngreso" class="text-danger"></span>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

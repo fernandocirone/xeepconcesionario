@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Plan>
+
+<table class="table table-hover table-bordered align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Código</th>
+            <th>Modelo</th>
+            <th>Cuota Apertura</th>
+            <th>Adelanto Mensual</th>
+            <th>Sellado</th>
+            <th>Cuota Ingreso</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="fila-Plan" data-id="@item.PlanId" style="cursor: pointer;">
+                <td>@item.Codigo</td>
+                <td>@item.Modelo</td>
+                <td>@item.CuotaApertura</td>
+                <td>@item.AdelantoMensual.ToString("C")</td>
+                <td>@item.Sellado.ToString("C")</td>
+                <td>@item.CuotaIngreso.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>

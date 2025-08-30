@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Estadísticas";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Panel de Estadísticas</h2>
+
+    <div class="row g-3 justify-content-center">
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Solicitudes" asp-action="Index" class="btn btn-primary btn-lg w-100 py-4">
+                📑 Solicitudes
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Clientes" asp-action="Index" class="btn btn-success btn-lg w-100 py-4">
+                👥 Clientes
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Vendedores" asp-action="Index" class="btn btn-warning btn-lg w-100 py-4">
+                🧑‍💼 Vendedores
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Cobros" asp-action="Index" class="btn btn-danger btn-lg w-100 py-4">
+                💰 Cobros
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Planes" asp-action="Index" class="btn btn-info btn-lg w-100 py-4">
+                🚗 Automóviles
+            </a>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <a asp-controller="Estadisticas" asp-action="Reportes" class="btn btn-dark btn-lg w-100 py-4">
+                📊 Reportes
+            </a>
+        </div>
+
+    </div>
+</div>

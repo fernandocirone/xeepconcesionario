@@ -1,0 +1,64 @@
+﻿@page
+@model EditUserModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <input type="hidden" asp-for="Input.Id" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" />
+                <label asp-for="Input.Email">Email</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.NombreCompleto" class="form-control" />
+                <label asp-for="Input.NombreCompleto">Nombre completo</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Telefono" class="form-control" />
+                <label asp-for="Input.Telefono">Teléfono</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Direccion" class="form-control" />
+                <label asp-for="Input.Direccion">Dirección</label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tipos de usuario</label>
+                <select asp-for="Input.TiposUsuarioIds"
+                        asp-items="Model.TiposUsuario"
+                        class="form-select"
+                        multiple>
+                </select>
+            </div>
+
+            <h5>Cambiar contraseña (opcional)</h5>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                <label asp-for="Input.Password">Nueva contraseña</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                <label asp-for="Input.ConfirmPassword">Confirmar contraseña</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

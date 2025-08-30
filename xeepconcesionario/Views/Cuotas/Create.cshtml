@@ -1,0 +1,62 @@
+﻿@model Cuota
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Cuota</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SolicitudId" class="control-label"></label>
+                <select asp-for="SolicitudId" class ="form-control" asp-items="ViewBag.SolicitudId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Numerocuota" class="control-label"></label>
+                <input asp-for="Numerocuota" class="form-control" />
+                <span asp-validation-for="Numerocuota" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PlazoMeses" class="control-label"></label>
+                <input asp-for="PlazoMeses" class="form-control" />
+                <span asp-validation-for="PlazoMeses" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MontoCuota" class="control-label"></label>
+                <input asp-for="MontoCuota" class="form-control" />
+                <span asp-validation-for="MontoCuota" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SaldoCuota" class="control-label"></label>
+                <input asp-for="SaldoCuota" class="form-control" />
+                <span asp-validation-for="SaldoCuota" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaVencimiento" class="control-label"></label>
+                <input asp-for="FechaVencimiento" class="form-control" />
+                <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaPago" class="control-label"></label>
+                <input asp-for="FechaPago" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="FechaPago" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

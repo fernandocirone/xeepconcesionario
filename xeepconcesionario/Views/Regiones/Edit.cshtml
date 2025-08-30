@@ -1,0 +1,43 @@
+﻿@model Region
+
+@{
+    ViewData["Title"] = "Editar Región";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">✏️ Editar Región</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="RegionId" />
+
+                        <div class="mb-3">
+                            <label asp-for="NombreRegion" class="form-label"></label>
+                            <input asp-for="NombreRegion" class="form-control" />
+                            <span asp-validation-for="NombreRegion" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">⬅️ Volver</a>
+                            <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

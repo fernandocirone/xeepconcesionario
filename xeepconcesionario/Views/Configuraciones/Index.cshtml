@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Configuraciones";
+}
+
+<div class="container py-3">
+    <h3 class="text-primary mb-4">Configuraciones</h3>
+
+    <ul class="nav nav-pills mb-4" id="configTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-tipo="estado" data-bs-toggle="pill" type="button" role="tab">Estados</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-tipo="condicion" data-bs-toggle="pill" type="button" role="tab">Condiciones de venta</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-tipo="tipobaja" data-bs-toggle="pill" type="button" role="tab">Tipos de baja</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-tipo="estadoactividad" data-bs-toggle="pill" type="button" role="tab">Estados de Actividad</button>
+        </li>
+    </ul>
+
+
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-success btn-sm" id="btnNuevo">
+            <i class="bi bi-file-earmark-plus-fill"></i> Nuevo Registro
+        </button>
+    </div>
+
+    <div id="gridContainer" class="card shadow-sm">
+        <div class="card-body" id="tablaHost">
+            <!-- Se carga por AJAX -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Upsert -->
+<div class="modal fade" id="upsertModal" tabindex="-1" aria-labelledby="upsertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="upsertModalLabel">Editar Registro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="upsertBody">
+                <!-- Formulario por AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let tipoActual = "estado";
+
+        function cargarLista() {
+            $.get("@Url.Action("List", "Configuraciones")", { tipo: tipoActual }, function (html) {
+                $("#tablaHost").html(html);
+            });
+        }
+
+        function cargarFormulario(tipo, id = null) {
+            const params = id ? { tipo: tipo, id: id } : { tipo: tipo };
+            $.get("@Url.Action("UpsertForm", "Configuraciones")", params, function (html) {
+                $("#upsertBody").html(html);
+                const modal = new bootstrap.Modal(document.getElementById('upsertModal'));
+                modal.show();
+
+                $("#formUpsert").on("submit", function (e) {
+                    e.preventDefault();
+                    const $form = $(this);
+
+                    $.ajax({
+                        url: $form.attr("action"),
+                        method: "POST",
+                        data: $form.serialize()
+                    }).done(function () {
+                        modal.hide();
+                        cargarLista();
+                    }).fail(function (xhr) {
+                        if (xhr.status === 400 || xhr.status === 422)
+                            $("#upsertBody").html(xhr.responseText);
+                        else
+                            alert(xhr.responseText || "Error guardando");
+                    });
+                });
+            });
+        }
+
+        $(document).on("click", "#configTabs .nav-link", function () {
+            $("#configTabs .nav-link").removeClass("active");
+            $(this).addClass("active");
+            tipoActual = $(this).data("tipo");
+            cargarLista();
+        });
+
+        $("#btnNuevo").on("click", function () {
+            cargarFormulario(tipoActual);
+        });
+
+        $(document).on("click", ".btn-edit", function () {
+            const id = $(this).data("id");
+            cargarFormulario(tipoActual, id);
+        });
+
+        $(document).on("click", ".btn-delete", function () {
+            if (!confirm("¿Eliminar el registro?")) return;
+            const id = $(this).data("id");
+            $.post("@Url.Action("Delete", "Configuraciones")",
+                { tipo: tipoActual, id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() })
+                .done(() => cargarLista())
+                .fail(xhr => alert(xhr.responseText || "Error eliminando"));
+        });
+
+        $(function () { cargarLista(); });
+    </script>
+
+    @Html.AntiForgeryToken()
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

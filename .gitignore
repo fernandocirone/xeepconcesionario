@@ -1,0 +1,15 @@
+# Visual Studio / .NET
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Publicaciones locales
+**/PublishProfiles/
+
+# Node (si tenés front)
+node_modules/
+dist/

@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Region>
+
+@{
+    ViewData["Title"] = "Regiones";
+}
+
+<div class="container-fluid d-flex flex-column" style="height: 80vh;">
+
+    <!-- Encabezado + Botón -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="text-primary m-0">REGIONES</h2>
+
+        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearRegion">
+            <i class="bi bi-plus-circle-fill"></i> Nueva Región
+        </button>
+
+    </div>
+
+    <!-- Tabla con scroll interno -->
+    <div class="table-responsive flex-grow-1 overflow-auto border rounded" style="min-height: 0;">
+        <table class="table table-hover table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Región</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NombreRegion</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.RegionId" class="btn btn-sm btn-warning">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.RegionId" class="btn btn-sm btn-info">Detalles</a>
+                            <a asp-action="Delete" asp-route-id="@item.RegionId" class="btn btn-sm btn-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalCrearRegion" tabindex="-1" aria-labelledby="modalCrearRegionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalCrearRegionLabel">Nueva Región</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("_FormRegion", new Region())
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

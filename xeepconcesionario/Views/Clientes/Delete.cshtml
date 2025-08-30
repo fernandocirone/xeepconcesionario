@@ -1,0 +1,125 @@
+﻿@model Cliente
+
+@{
+    ViewData["Title"] = "Eliminar Cliente";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">⚠️ Eliminar Cliente</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4 text-muted">
+                        ¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.
+                    </p>
+
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Nombre y Apellido</th>
+                                <td>@Model.ApellidoYNombre</td>
+                            </tr>
+                            <tr>
+                                <th>DNI</th>
+                                <td>@Model.Dni</td>
+                            </tr>
+                            <tr>
+                                <th>Teléfono Fijo</th>
+                                <td>@Model.TelefonoFijo</td>
+                            </tr>
+                            <tr>
+                                <th>Teléfono Celular</th>
+                                <td>@Model.TelefonoCelular</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>@Model.Mail</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha de Nacimiento</th>
+                                <td>@Model.FechaNacimiento?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th>Dirección</th>
+                                <td>@Model.Direccion</td>
+                            </tr>
+                            <tr>
+                                <th>Nacionalidad</th>
+                                <td>@Model.Nacionalidad</td>
+                            </tr>
+                            <tr>
+                                <th>Barrio</th>
+                                <td>@Model.Barrio</td>
+                            </tr>
+                            <tr>
+                                <th>Tipo Vivienda</th>
+                                <td>@Model.TipoVivienda</td>
+                            </tr>
+                            <tr>
+                                <th>¿Tiene Tarjeta?</th>
+                                <td>@(Model.TieneTarjetaCredito == true ? "Sí" : "No")</td>
+                            </tr>
+                            <tr>
+                                <th>Sexo</th>
+                                <td>@Model.Sexo</td>
+                            </tr>
+                            <tr>
+                                <th>Estado Civil</th>
+                                <td>@Model.EstadoCivil</td>
+                            </tr>
+                            <tr>
+                                <th>Ocupación</th>
+                                <td>@Model.Ocupacion</td>
+                            </tr>
+                            <tr>
+                                <th>Empresa</th>
+                                <td>@Model.Empresa</td>
+                            </tr>
+                            <tr>
+                                <th>Domicilio Laboral</th>
+                                <td>@Model.DomicilioLaboral</td>
+                            </tr>
+                            <tr>
+                                <th>Cargo</th>
+                                <td>@Model.Cargo</td>
+                            </tr>
+                            <tr>
+                                <th>Ingresos Mensuales</th>
+                                <td>@Model.IngresosMensuales?.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <th>Tipo Ocupación</th>
+                                <td>@Model.TipoOcupacion</td>
+                            </tr>
+                            <tr>
+                                <th>Razón Social</th>
+                                <td>@Model.RazonSocial</td>
+                            </tr>
+                            <tr>
+                                <th>Localidad</th>
+                                <td>@Model.Localidad?.NombreLocalidad</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <form asp-action="Delete" class="mt-3">
+                        <input type="hidden" asp-for="ClienteId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                ⬅️ Volver a la lista
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                🗑️ Eliminar Cliente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

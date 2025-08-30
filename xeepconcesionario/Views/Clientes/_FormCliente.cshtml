@@ -1,0 +1,121 @@
+﻿@model Cliente
+@inject Microsoft.AspNetCore.Mvc.Rendering.IHtmlHelper HtmlHelper
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="ApellidoYNombre" class="form-label"></label>
+            <input asp-for="ApellidoYNombre" class="form-control" />
+            <span asp-validation-for="ApellidoYNombre" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Dni" class="form-label"></label>
+            <input asp-for="Dni" class="form-control" />
+            <span asp-validation-for="Dni" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="TelefonoFijo" class="form-label"></label>
+            <input asp-for="TelefonoFijo" class="form-control" />
+            <span asp-validation-for="TelefonoFijo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="TelefonoCelular" class="form-label"></label>
+            <input asp-for="TelefonoCelular" class="form-control" />
+            <span asp-validation-for="TelefonoCelular" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Mail" class="form-label"></label>
+            <input asp-for="Mail" class="form-control" />
+            <span asp-validation-for="Mail" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="FechaNacimiento" class="form-label"></label>
+            <input asp-for="FechaNacimiento" type="date" class="form-control" />
+            <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+        </div>
+        <div class="col-md-12 mb-3">
+            <label asp-for="Direccion" class="form-label"></label>
+            <input asp-for="Direccion" class="form-control" />
+            <span asp-validation-for="Direccion" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Nacionalidad" class="form-label"></label>
+            <input asp-for="Nacionalidad" class="form-control" />
+            <span asp-validation-for="Nacionalidad" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="LocalidadId" class="form-label"></label>
+            <select asp-for="LocalidadId" class="form-select" asp-items='ViewData["LocalidadId"] as SelectList'></select>
+            <span asp-validation-for="LocalidadId" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Barrio" class="form-label"></label>
+            <input asp-for="Barrio" class="form-control" />
+            <span asp-validation-for="Barrio" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="TipoVivienda" class="form-label"></label>
+            <input asp-for="TipoVivienda" class="form-control" />
+            <span asp-validation-for="TipoVivienda" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="Sexo" class="form-label"></label>
+            <input asp-for="Sexo" class="form-control" />
+            <span asp-validation-for="Sexo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="EstadoCivil" class="form-label"></label>
+            <input asp-for="EstadoCivil" class="form-control" />
+            <span asp-validation-for="EstadoCivil" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Ocupacion" class="form-label"></label>
+            <input asp-for="Ocupacion" class="form-control" />
+            <span asp-validation-for="Ocupacion" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Empresa" class="form-label"></label>
+            <input asp-for="Empresa" class="form-control" />
+            <span asp-validation-for="Empresa" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="DomicilioLaboral" class="form-label"></label>
+            <input asp-for="DomicilioLaboral" class="form-control" />
+            <span asp-validation-for="DomicilioLaboral" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Cargo" class="form-label"></label>
+            <input asp-for="Cargo" class="form-control" />
+            <span asp-validation-for="Cargo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="IngresosMensuales" class="form-label"></label>
+            <input asp-for="IngresosMensuales" class="form-control" />
+            <span asp-validation-for="IngresosMensuales" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="TipoOcupacion" class="form-label"></label>
+            <input asp-for="TipoOcupacion" class="form-control" />
+            <span asp-validation-for="TipoOcupacion" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="RazonSocial" class="form-label"></label>
+            <input asp-for="RazonSocial" class="form-control" />
+            <span asp-validation-for="RazonSocial" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mt-4">
+            <div class="form-check">
+                <input class="form-check-input" asp-for="TieneTarjetaCredito" />
+                <label class="form-check-label" asp-for="TieneTarjetaCredito"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

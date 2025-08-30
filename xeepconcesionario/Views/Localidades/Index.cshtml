@@ -1,0 +1,74 @@
+﻿@model IEnumerable<Localidad>
+
+@{
+    ViewData["Title"] = "Localidades";
+}
+
+<div class="container-fluid d-flex flex-column" style="height: 80vh;">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="text-primary m-0">LOCALIDADES</h2>
+
+        <div class="d-flex gap-2 ms-auto">
+            <a asp-controller="Regiones" asp-action="Index" class="btn btn-success btn-sm">
+                <i class="bi bi-globe-americas"></i> Regiones
+            </a>
+            <a asp-controller="Provincias" asp-action="Index" class="btn btn-success btn-sm">
+                <i class="bi bi-map"></i> Provincias
+            </a>
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearLocalidad">
+                <i class="bi bi-geo-alt-fill"></i> Nueva Localidad
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Tabla con scroll interno -->
+    <div class="table-responsive flex-grow-1 overflow-auto border rounded" style="min-height: 0;">
+        <table class="table table-hover table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Localidad</th>
+                    <th>Código Postal</th>
+                    <th>Provincia</th>
+                    <th>Región</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NombreLocalidad</td>
+                        <td>@item.CodigoPostal</td>
+                        <td>@item.Provincia?.NombreProvincia</td>
+                        <td>@item.Region?.NombreRegion</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.LocalidadId" class="btn btn-sm btn-warning">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.LocalidadId" class="btn btn-sm btn-info">Detalles</a>
+                            <a asp-action="Delete" asp-route-id="@item.LocalidadId" class="btn btn-sm btn-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalCrearLocalidad" tabindex="-1" aria-labelledby="modalCrearLocalidadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalCrearLocalidadLabel">Nueva Localidad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("_FormLocalidad", new Localidad())
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_FormLocalidad", new Localidad())

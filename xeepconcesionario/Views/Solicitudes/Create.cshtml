@@ -1,0 +1,423 @@
+﻿@model CreateSolicitudViewModel
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Nueva Solicitud";
+}
+
+<form asp-action="Create" method="post" id="formSolicitud">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row g-3">
+        <!-- Contrato -->
+        <div class="col-md-6">
+            <label class="form-label">Negociación</label>
+            <div class="input-group">
+                <select asp-for="ContratoId"
+                        class="form-select form-select-sm"
+                        asp-items="ViewBag.ContratoId"
+                        id="ContratoId">
+                </select>
+                <button type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        id="abrirModalContrato">
+                    <i class="bi bi-plus-circle"></i> Nuevo
+                </button>
+            </div>
+        </div>
+
+        <!-- Numero Solicitud --></>
+        <div class="col-md-6">
+            <label asp-for="NumeroSolicitud" class="form-label">Numero Solicitud</label>
+            <input asp-for="NumeroSolicitud" class="form-control" id="NumeroSolicitud" />
+            <span asp-validation-for="NumeroSolicitud" class="text-danger"></span>
+        </div>
+
+        <!-- Vendedor -->
+        <div class="col-md-6">
+            <label asp-for="VendedorUserId" class="form-label">Vendedor</label>
+            @{
+                var vendedorBloqueado = (bool)(ViewBag.VendedorBloqueado ?? false);
+            }
+            @if (vendedorBloqueado)
+            {
+                <select asp-for="VendedorUserId" class="form-select" asp-items="ViewBag.VendedorUserId" disabled></select>
+                <input type="hidden" asp-for="VendedorUserId" />
+            }
+            else
+            {
+                <select asp-for="VendedorUserId" class="form-select" asp-items="ViewBag.VendedorUserId"></select>
+            }
+            <span asp-validation-for="VendedorUserId" class="text-danger"></span>
+        </div>
+
+        <!-- Supervisor -->
+        <div class="col-md-6">
+            <label asp-for="SupervisorUserId" class="form-label">Supervisor</label>
+            <select asp-for="SupervisorUserId" class="form-select" asp-items="ViewBag.SupervisorUserId"></select>
+            <span asp-validation-for="SupervisorUserId" class="text-danger"></span>
+        </div>
+
+        <!-- Jefe de Ventas -->
+        <div class="col-md-6">
+            <label asp-for="JefeVentasUserId" class="form-label">Jefe de Ventas</label>
+            <select asp-for="JefeVentasUserId" class="form-select" asp-items="ViewBag.JefeVentasUserId"></select>
+            <span asp-validation-for="JefeVentasUserId" class="text-danger"></span>
+        </div>
+
+        <!-- Usuario (quien carga) -->
+        <input type="hidden" asp-for="UsuarioId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
+
+        <!-- Cliente: existente o nuevo -->
+        <div class="col-12">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" asp-for="CrearClienteNuevo" type="radio" value="false" id="rbCliExistente" checked />
+                <label class="form-check-label" for="rbCliExistente">Cliente existente</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" asp-for="CrearClienteNuevo" type="radio" value="true" id="rbCliNuevo" />
+                <label class="form-check-label" for="rbCliNuevo">Nuevo cliente</label>
+            </div>
+        </div>
+
+        <!-- Cliente existente -->
+        <div class="col-md-6" id="secCliExistente">
+            <label asp-for="ClienteId" class="form-label">Cliente</label>
+            <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId"></select>
+            <span asp-validation-for="ClienteId" class="text-danger"></span>
+        </div>
+
+        <!-- Cliente nuevo -->
+        <div class="col-12 border rounded p-3 bg-light" id="secCliNuevo" style="display:none;">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.ApellidoYNombre" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.ApellidoYNombre" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Dni" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Dni" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.TelefonoFijo" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.TelefonoFijo" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.TelefonoCelular" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.TelefonoCelular" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Mail" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Mail" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.FechaNacimiento" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.FechaNacimiento" type="date" class="form-control" />
+                </div>
+                <div class="col-md-12">
+                    <label asp-for="ClienteNuevo.Direccion" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Direccion" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Nacionalidad" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Nacionalidad" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.LocalidadId" class="form-label"></label>
+                    <select asp-for="ClienteNuevo.LocalidadId" class="form-select" asp-items="ViewBag.LocalidadId"></select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Barrio" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Barrio" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.TipoVivienda" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.TipoVivienda" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Sexo" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Sexo" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.EstadoCivil" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.EstadoCivil" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Ocupacion" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Ocupacion" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Empresa" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Empresa" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.DomicilioLaboral" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.DomicilioLaboral" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.Cargo" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.Cargo" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.IngresosMensuales" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.IngresosMensuales" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.TipoOcupacion" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.TipoOcupacion" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ClienteNuevo.RazonSocial" class="form-label"></label>
+                    <input asp-for="ClienteNuevo.RazonSocial" class="form-control" />
+                </div>
+                <div class="col-md-6 mt-4">
+                    <div class="form-check">
+                        <input type="checkbox"
+                               name="ClienteNuevo.TieneTarjetaCredito"
+                               value="true"
+                        @(Model.ClienteNuevo.TieneTarjetaCredito == true ? "checked" : "") />
+                        <label class="form-check-label">Tiene tarjeta de crédito</label>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Búsqueda por código -->
+        <div class="col-md-6">
+            <label for="codigoAuto" class="form-label">Buscar por código</label>
+            <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
+        </div>
+
+        <!-- Automóvil -->
+        <div class="col-md-6">
+            <label asp-for="PlanId" class="form-label">Automóvil</label>
+            <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
+            <span asp-validation-for="PlanId" class="text-danger"></span>
+        </div>
+
+        <!-- Condición / Tipo Baja / Estado / Fechas / Sellados -->
+        <div class="col-md-6">
+            <label class="form-label">Condición de venta</label>
+            <select asp-for="CondicionVentaId" class="form-select" asp-items="ViewBag.CondicionVentaId"></select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Tipo de baja</label>
+            <select asp-for="TipoBajaId" class="form-select" asp-items="ViewBag.TipoBajaId"></select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Estado</label>
+            <select class="form-select" disabled>
+                <option value="1" selected>Nuevo</option>
+            </select>
+            <input type="hidden" asp-for="EstadoId" value="1" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="FechaCarga" class="form-label">Fecha de carga</label>
+            <input asp-for="FechaCarga" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="FechaSuscripcion" class="form-label">Fecha suscripción</label>
+            <input asp-for="FechaSuscripcion" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="ValorSellado1" class="form-label">Valor Sellado</label>
+            <input asp-for="ValorSellado1" class="form-control" id="ValorSellado1" />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="ValorSellado2" class="form-label">Valor Sellado 2</label>
+            <input asp-for="ValorSellado2" class="form-control" id="ValorSellado2" />
+        </div>
+
+        <!-- Parámetros de cuotas -->
+        <div class="col-md-4">
+            <label asp-for="CantidadCuotas" class="form-label">Cantidad cuotas</label>
+            <input asp-for="CantidadCuotas" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="FechaPrimerVencimiento" class="form-label">1er vencimiento</label>
+            <input asp-for="FechaPrimerVencimiento" type="date" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label asp-for="ImporteCuota" class="form-label">Importe cuota</label>
+            <input asp-for="ImporteCuota" class="form-control" />
+        </div>
+        <div class="col-md-12">
+            <label asp-for="ObservacionSolicitud" class="form-label">Observacion</label>
+            <input asp-for="ObservacionSolicitud" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar Solicitud
+        </button>
+    </div>
+</form>
+
+<!-- Modal: Crear Contrato -->
+<div class="modal fade" id="modalContrato" tabindex="-1" aria-labelledby="modalContratoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalContratoLabel" class="modal-title">Nuevo Contrato</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formContrato">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="NombreContrato" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="NombreContrato" maxlength="100" required />
+                        <div class="form-text">Ej: “Plan 60 cuotas”.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="DescripcionContrato" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="DescripcionContrato" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="PlazoMeses" class="form-label">Plazo (meses)</label>
+                        <input type="number" class="form-control" id="PlazoMeses" min="1" max="240" />
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarContrato">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        // Toggle cliente nuevo/existente
+        function syncClienteSections() {
+            const nuevo = document.getElementById('rbCliNuevo').checked;
+            document.getElementById('secCliExistente').style.display = nuevo ? 'none' : '';
+            document.getElementById('secCliNuevo').style.display = nuevo ? '' : 'none';
+        }
+        document.getElementById('rbCliExistente').addEventListener('change', syncClienteSections);
+        document.getElementById('rbCliNuevo').addEventListener('change', syncClienteSections);
+        syncClienteSections();
+
+        // Buscar auto por prefijo de código
+        document.getElementById('codigoAuto').addEventListener('input', function () {
+            const codigo = this.value.toLowerCase();
+            const sel = document.getElementById('PlanId');
+            for (const opt of sel.options) {
+                if (opt.text.toLowerCase().startsWith(codigo)) {
+                    sel.value = opt.value;
+                    sel.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+        });
+
+        document.getElementById('abrirModalContrato')
+            .addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('modalContrato'));
+                modal.show();
+            });
+
+        // Guardar contrato por AJAX
+        document.getElementById('btnGuardarContrato')
+            .addEventListener('click', function () {
+                const nombre = document.getElementById('NombreContrato').value.trim();
+                const desc = document.getElementById('DescripcionContrato').value.trim();
+                const plazo = document.getElementById('PlazoMeses').value;
+
+                if (!nombre) {
+                    alert('El nombre del contrato es obligatorio.');
+                    document.getElementById('NombreContrato').focus();
+                    return;
+                }
+
+                const token = document.querySelector('#formContrato input[name="__RequestVerificationToken"]')?.value || '';
+
+                fetch('@Url.Action("CrearDesdeSolicitud", "Contratos")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'RequestVerificationToken': token
+                    },
+                    body: new URLSearchParams({
+                        NombreContrato: nombre,
+                        DescripcionContrato: desc,
+                        PlazoMeses: plazo
+                    })
+                })
+                    .then(r => r.ok ? r.json() : Promise.reject(r))
+                    .then(resp => {
+                        if (!resp?.success) {
+                            alert('No se pudo guardar el contrato: ' + (resp?.message ?? 'Error desconocido'));
+                            return;
+                        }
+
+                        // Agregar al combo y seleccionar
+                        const sel = document.getElementById('ContratoId');
+                        const opt = new Option(resp.nombre ?? ('Contrato #' + resp.id), resp.id, true, true);
+                        sel.add(opt, undefined);
+
+                        // Cerrar modal y limpiar
+                        bootstrap.Modal.getInstance(document.getElementById('modalContrato')).hide();
+                        document.getElementById('formContrato').reset();
+                    })
+                    .catch(err => {
+                        alert('Error al guardar el contrato.');
+                        console.error(err);
+                    });
+            });
+
+        // --- Precarga de sellados por automóvil
+        (function () {
+            const urlBase = '/Planes/sellados/';
+
+            $(document).on('change', '#PlanId', function () {
+                const id = $(this).val();
+                if (!id) { limpiarSellados(); return; }
+                cargarSellados(id);
+            });
+
+            $(function () {
+                const id = $('#PlanId').val();
+                if (id) cargarSellados(id);
+            });
+
+            $(document).on('shown.bs.modal', '#modalCrearSolicitud', function () {
+                const id = $('#PlanId').val();
+                if (id) cargarSellados(id);
+            });
+
+            function cargarSellados(PlanId) {
+                $.getJSON(urlBase + PlanId)
+                    .done(function (data) {
+                        setSellados(data?.sellado1, data?.sellado2);
+                    })
+                    .fail(function (xhr) {
+                        console.error('Error al obtener sellados', xhr.status, xhr.responseText);
+                        limpiarSellados();
+                    });
+            }
+
+            function setSellados(s1, s2) {
+                $('#ValorSellado1').val(s1 ?? 0);
+                $('#ValorSellado2').val(s2 ?? 0);
+            }
+
+            function limpiarSellados() {
+                $('#ValorSellado1').val('');
+                $('#ValorSellado2').val('');
+            }
+        })();
+    </script>
+}

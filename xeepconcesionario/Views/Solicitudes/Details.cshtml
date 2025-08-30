@@ -1,0 +1,141 @@
+﻿@model CreateSolicitudViewModel
+@{
+    ViewData["Title"] = "Detalle Solicitud";
+}
+
+<div class="row g-2">
+    <div class="col-md-4"><strong>Negociación:</strong> @Model.ContratoNombre</div>
+    <div class="col-md-4"><strong>Número Solicitud:</strong> @Model.NumeroSolicitud</div>
+    <div class="col-md-4"><strong>Vendedor:</strong> @Model.VendedorNombre</div>
+
+    <div class="col-md-4"><strong>Supervisor:</strong> @Model.SupervisorNombre</div>
+    <div class="col-md-4"><strong>Jefe de Ventas:</strong> @Model.JefeVentasNombre</div>
+    <div class="col-md-4"><strong>Cliente:</strong> @Model.ClienteNombre</div>
+
+    <div class="col-12 border rounded p-2 bg-light">
+        <div class="row g-2">
+            <div class="col-md-4"><strong>Apellido y Nombre:</strong> @Model.ClienteNuevo.ApellidoYNombre</div>
+            <div class="col-md-4"><strong>DNI:</strong> @Model.ClienteNuevo.Dni</div>
+            <div class="col-md-4"><strong>Teléfono Fijo:</strong> @Model.ClienteNuevo.TelefonoFijo</div>
+
+            <div class="col-md-4"><strong>Teléfono Celular:</strong> @Model.ClienteNuevo.TelefonoCelular</div>
+            <div class="col-md-4"><strong>Mail:</strong> @Model.ClienteNuevo.Mail</div>
+            <div class="col-md-4"><strong>Fecha Nacimiento:</strong> @Model.ClienteNuevo.FechaNacimiento?.ToString("dd/MM/yyyy")</div>
+
+            <div class="col-md-6"><strong>Dirección:</strong> @Model.ClienteNuevo.Direccion</div>
+            <div class="col-md-6"><strong>Nacionalidad:</strong> @Model.ClienteNuevo.Nacionalidad</div>
+
+            <div class="col-md-4"><strong>Localidad:</strong> @Model.LocalidadNombre</div>
+            <div class="col-md-4"><strong>Barrio:</strong> @Model.ClienteNuevo.Barrio</div>
+            <div class="col-md-4"><strong>Tipo Vivienda:</strong> @Model.ClienteNuevo.TipoVivienda</div>
+
+            <div class="col-md-4"><strong>Sexo:</strong> @Model.ClienteNuevo.Sexo</div>
+            <div class="col-md-4"><strong>Estado Civil:</strong> @Model.ClienteNuevo.EstadoCivil</div>
+            <div class="col-md-4"><strong>Ocupación:</strong> @Model.ClienteNuevo.Ocupacion</div>
+
+            <div class="col-md-4"><strong>Empresa:</strong> @Model.ClienteNuevo.Empresa</div>
+            <div class="col-md-4"><strong>Domicilio Laboral:</strong> @Model.ClienteNuevo.DomicilioLaboral</div>
+            <div class="col-md-4"><strong>Cargo:</strong> @Model.ClienteNuevo.Cargo</div>
+
+            <div class="col-md-4"><strong>Ingresos Mensuales:</strong> @Model.ClienteNuevo.IngresosMensuales</div>
+            <div class="col-md-4"><strong>Tipo Ocupación:</strong> @Model.ClienteNuevo.TipoOcupacion</div>
+            <div class="col-md-4"><strong>Razón Social:</strong> @Model.ClienteNuevo.RazonSocial</div>
+
+            <div class="col-md-4"><strong>Tiene tarjeta de crédito:</strong> @(Model.ClienteNuevo.TieneTarjetaCredito == true ? "Sí" : "No")</div>
+        </div>
+    </div>
+
+    <div class="col-md-4"><strong>Automóvil:</strong> @Model.PlanNombre</div>
+    <div class="col-md-4"><strong>Condición de venta:</strong> @Model.CondicionVentaNombre</div>
+    <div class="col-md-4"><strong>Tipo de baja:</strong> @Model.TipoBajaNombre</div>
+
+    <div class="col-md-4"><strong>Estado:</strong> @Model.EstadoNombre</div>
+    <div class="col-md-4"><strong>Fecha de carga:</strong> @Model.FechaCarga?.ToString("dd/MM/yyyy")</div>
+    <div class="col-md-4"><strong>Fecha suscripción:</strong> @Model.FechaSuscripcion?.ToString("dd/MM/yyyy")</div>
+
+    <div class="col-md-4"><strong>Valor Sellado:</strong> @Model.ValorSellado1</div>
+    <div class="col-md-4"><strong>Valor Sellado 2:</strong> @Model.ValorSellado2</div>
+    <div class="col-md-4"><strong>Cantidad cuotas:</strong> @Model.CantidadCuotas</div>
+
+    <div class="col-md-4"><strong>1er vencimiento:</strong> @Model.FechaPrimerVencimiento?.ToString("dd/MM/yyyy")</div>
+    <div class="col-md-4"><strong>Importe cuota:</strong> @Model.ImporteCuota</div>
+
+    <div class="col-md-12"><strong>Observación:</strong> @Model.ObservacionSolicitud</div>
+</div>
+
+<hr />
+<h3>Historial de actividades</h3>
+
+@if (Model.Actividades != null && Model.Actividades.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Observación</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var act in Model.Actividades.OrderByDescending(a => a.Fecha))
+            {
+                <tr>
+                    <td>@act.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@act.EstadoActividad.NombreEstadoActividad</td>
+                    <td>@act.Observacion</td>
+                    <td>@(act.Usuario?.NombreCompleto ?? act.Usuario?.UserName)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>No hay actividades registradas.</em></p>
+}
+
+<div class="mt-2">
+    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevaActividad">
+        <i class="bi bi-plus-circle"></i> Nueva actividad
+    </button>
+</div>
+
+<!-- Modal Nueva Actividad -->
+<div class="modal fade" id="modalNuevaActividad" tabindex="-1" aria-labelledby="modalNuevaActividadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-controller="ActividadesSolicitud" asp-action="CreateFromDetails" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevaActividadLabel">Agregar actividad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="SolicitudId" value="@Model.SolicitudId" />
+
+                    <div class="mb-3">
+                        <label for="EstadoActividadId" class="form-label">Estado</label>
+                        <select class="form-select" name="EstadoActividadId" asp-items="ViewBag.EstadosActividad"></select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Observacion" class="form-label">Observación</label>
+                        <textarea class="form-control" name="Observacion" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>

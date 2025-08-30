@@ -1,0 +1,16 @@
+﻿@model Region
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="NombreRegion" class="form-label"></label>
+        <input asp-for="NombreRegion" class="form-control" />
+        <span asp-validation-for="NombreRegion" class="text-danger"></span>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

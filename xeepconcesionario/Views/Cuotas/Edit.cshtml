@@ -1,0 +1,81 @@
+﻿@model Cuota
+
+@{
+    ViewData["Title"] = "Editar Cuota";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">✏️ Editar Cuota</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="CuotaId" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="SolicitudId" class="form-label"></label>
+                                <select asp-for="SolicitudId" class="form-select" asp-items="ViewBag.SolicitudId"></select>
+                                <span asp-validation-for="SolicitudId" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Numerocuota" class="form-label"></label>
+                                <input asp-for="Numerocuota" class="form-control" type="number" min="1" />
+                                <span asp-validation-for="Numerocuota" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PlazoMeses" class="form-label"></label>
+                                <input asp-for="PlazoMeses" class="form-control" type="number" min="1" />
+                                <span asp-validation-for="PlazoMeses" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="MontoCuota" class="form-label"></label>
+                                <input asp-for="MontoCuota" class="form-control" type="number" step="0.01" />
+                                <span asp-validation-for="MontoCuota" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="SaldoCuota" class="form-label"></label>
+                                <input asp-for="SaldoCuota" class="form-control" type="number" step="0.01" />
+                                <span asp-validation-for="SaldoCuota" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="FechaVencimiento" class="form-label"></label>
+                                <input asp-for="FechaVencimiento" class="form-control" type="date" />
+                                <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="FechaPago" class="form-label"></label>
+                                <input asp-for="FechaPago" class="form-control" type="date" />
+                                <span asp-validation-for="FechaPago" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">⬅️ Volver</a>
+                            <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

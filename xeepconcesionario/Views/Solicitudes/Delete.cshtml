@@ -1,0 +1,102 @@
+﻿@model Solicitud
+
+@{
+    ViewData["Title"] = "Eliminar Solicitud";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">⚠️ Eliminar Solicitud</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4 text-muted">
+                        ¿Estás seguro de que deseas eliminar esta solicitud? Esta acción no se puede deshacer.
+                    </p>
+
+                    <table class="table table-sm table-striped align-middle">
+                        <tbody>
+                            <tr>
+                                <th>Cargada por (Usuario)</th>
+                                <td>@Model.Usuario?.Email ?? Model.UsuarioId</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha de carga</th>
+                                <td>@Model.FechaCarga?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha de suscripción</th>
+                                <td>@Model.FechaSuscripcion?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th>Valor sellado 1</th>
+                                <td>@Model.ValorSellado1</td>
+                            </tr>
+                            <tr>
+                                <th>Valor sellado 2</th>
+                                <td>@Model.ValorSellado2</td>
+                            </tr>
+                            <tr>
+                                <th>Vendedor</th>
+                                <td>@(Model.Vendedor?.NombreCompleto ?? Model.Vendedor?.Email ?? "—")</td>
+                            </tr>
+                            <tr>
+                                <th>Supervisor</th>
+                                <td>@(Model.Supervisor?.NombreCompleto ?? Model.Supervisor?.Email ?? "—")</td>
+                            </tr>
+                            <tr>
+                                <th>Jefe de Ventas</th>
+                                <td>@(Model.JefeVentas?.NombreCompleto ?? Model.JefeVentas?.Email ?? "—")</td>
+                            </tr>
+                            <tr>
+                                <th>Cliente</th>
+                                <td>@(Model.Cliente?.ApellidoYNombre ?? $"#{Model.ClienteId}")</td>
+                            </tr>
+                            <tr>
+                                <th>Automóvil</th>
+                                <td>
+                                    @(Model.Plan is null
+                                        ? $"#{Model.PlanId}"
+                                        : $"{Model.Plan.Codigo} - {Model.Plan.Modelo}")
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Condición de venta</th>
+                                <td>@(Model.CondicionVenta?.NombreCondicionVenta ?? $"#{Model.CondicionVentaId}")</td>
+                            </tr>
+                            <tr>
+                                <th>Tipo de baja</th>
+                                <td>@(Model.TipoBaja?.NombreTipoBaja ?? $"#{Model.TipoBajaId}")</td>
+                            </tr>
+                            <tr>
+                                <th>Estado</th>
+                                <td>@(Model.Estado?.NombreEstado ?? $"#{Model.EstadoId}")</td>
+                            </tr>
+                            <tr>
+                                <th>Negociación (Contrato)</th>
+                                <td>@(Model.ContratoId?.ToString() ?? "—")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <form asp-action="Delete" class="mt-3">
+                        <input type="hidden" asp-for="SolicitudId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                ⬅️ Volver a la lista
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                🗑️ Eliminar Solicitud
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

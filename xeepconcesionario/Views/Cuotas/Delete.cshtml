@@ -1,0 +1,70 @@
+﻿@model Cuota
+
+@{
+    ViewData["Title"] = "Eliminar Cuota";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">⚠️ Eliminar Cuota</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4 text-muted">
+                        ¿Estás seguro de que deseas eliminar esta cuota? Esta acción no se puede deshacer.
+                    </p>
+
+                    <table class="table table-sm table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Número de Cuota</th>
+                                <td>@Model.Numerocuota</td>
+                            </tr>
+                            <tr>
+                                <th>Plazo (meses)</th>
+                                <td>@Model.PlazoMeses</td>
+                            </tr>
+                            <tr>
+                                <th>Monto Cuota</th>
+                                <td>@Model.MontoCuota.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <th>Saldo Cuota</th>
+                                <td>@Model.SaldoCuota.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha Vencimiento</th>
+                                <td>@Model.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th>Fecha Pago</th>
+                                <td>@Model.FechaPago?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <th>Solicitud</th>
+                                <td>@Model.Solicitud?.SolicitudId</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <form asp-action="Delete" class="mt-3">
+                        <input type="hidden" asp-for="CuotaId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                ⬅️ Volver a la lista
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                🗑️ Eliminar Cuota
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

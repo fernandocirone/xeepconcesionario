@@ -1,0 +1,115 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LAB Automotores</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/xeepconcesionario.styles.css" asp-append-version="true" />
+    <link rel="icon" type="image/jpg" href="~/images/logoxeep.jpg" />
+
+
+    <style>
+        /* Navbar personalizado */
+        .navbar {
+            background: linear-gradient(90deg, #008085, #0069d9);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .navbar-nav .nav-link {
+            color: #e0e0e0 !important;
+            margin-right: .75rem;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #ffffff !important;
+                font-weight: 500;
+            }
+
+ 
+
+
+        /* Footer */
+        footer {
+            background-color: #004085;
+            color: #ddd;
+            padding: 1rem 0;
+        }
+
+            footer a {
+                color: #9ec5fe;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    🚗 Automotores
+
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Solicitudes" asp-action="Index">📄 Solicitudes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Clientes" asp-action="Index">👥 Clientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Planes" asp-action="Index">🚘 Automóviles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Cobros" asp-action="Index">💵 Cobros</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">👤 Usuarios</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Configuraciones" asp-action="Index">⚙️ Configuraciones</a>
+                            </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENIDO -->
+    <div class="container-fluid">
+        <main style="margin-top:10px" role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,222 @@
+﻿@model Solicitud
+@using System.Security.Claims
+
+<style>
+    #ContratoId {
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
+</style>
+
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row g-3">
+
+        <!-- Contrato -->
+        <div class="col-md-6">
+            <label>Negociacion</label>
+            <div class="input-group">
+                <select asp-for="ContratoId"
+                        class="form-select form-select-sm"
+                        asp-items="ViewBag.ContratoId"
+                        id="ContratoId"
+                        style="max-width: 200px;"
+                        readonly>
+                </select>
+
+                <button type="button"
+                        class="btn btn-outline-primary btn-lg"
+                        id="abrirModalContrato"
+                        style="flex-grow: 1;">
+                    <i class="bi bi-plus-circle"></i> Nuevo
+                </button>
+            </div>
+        </div>
+
+        <!-- Numero Solicitud --></>
+        <div class="col-md-6">
+            <label asp-for="NumeroSolicitud" class="form-label">Valor Sellado 2</label>
+            <input asp-for="NumeroSolicitud" class="form-control" id="NumeroSolicitud" />
+            <span asp-validation-for="NumeroSolicitud" class="text-danger"></span>
+        </div>
+
+        <!-- Resto de campos -->
+        <div class="col-md-6">
+            <label asp-for="VendedorUserId" class="form-label">Vendedor</label>
+            <select asp-for="VendedorUserId" class="form-select" asp-items="ViewBag.VendedorUserId"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Usuario</label>
+            <input type="text" class="form-control" value="@User.Identity?.Name" readonly />
+            <input type="hidden" asp-for="UsuarioId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
+            <span asp-validation-for="UsuarioId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="ClienteId" class="form-label">Cliente</label>
+            <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="codigoAuto" class="form-label">Buscar por código</label>
+            <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="PlanId" class="form-label">Plan</label>
+            <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Condicion Venta</label>
+            <select asp-for="CondicionVentaId" class="form-select" asp-items="ViewBag.CondicionVentaId"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Tipo Baja</label>
+            <select asp-for="TipoBajaId" class="form-select" asp-items="ViewBag.TipoBajaId"></select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Estado</label>
+            <select asp-for="EstadoId" class="form-select" asp-items="ViewBag.EstadoId" disabled>
+                <option value="1" selected>Nuevo</option>
+            </select>
+            <input type="hidden" asp-for="EstadoId" value="1" />
+        </div>
+
+
+        <div class="col-md-6">
+            <label asp-for="FechaCarga" class="form-label">Fecha de carga</label>
+            <input asp-for="FechaCarga" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+            <span asp-validation-for="FechaCarga" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="FechaSuscripcion" class="form-label">Fecha Suscripcion</label>
+            <input asp-for="FechaSuscripcion" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            <span asp-validation-for="FechaSuscripcion" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="ValorSellado1" class="form-label">Valor Sellado</label>
+            <input asp-for="ValorSellado1" class="form-control" id="ValorSellado1" />
+            <span asp-validation-for="ValorSellado1" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="ValorSellado2" class="form-label">Valor Sellado 2</label>
+            <input asp-for="ValorSellado2" class="form-control" id="ValorSellado2" />
+            <span asp-validation-for="ValorSellado2" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar Solicitud
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        // Abrir modal contrato cerrando el de solicitud (flujo limpio)
+        $(document).on('click', '#abrirModalContrato', function () {
+            document.activeElement.blur();
+            $('#modalCrearSolicitud').modal('hide');
+            $('#modalCrearSolicitud').one('hidden.bs.modal', function () {
+                $('#modalContrato').modal('show');
+            });
+        });
+
+        // Guardar contrato por AJAX
+        $(document).on('click', '#btnGuardarContrato', function () {
+            let datos = {
+                NombreContrato: $("#NombreContrato").val(),
+                DescripcionContrato: $("#DescripcionContrato").val(),
+                PlazoMeses: $("#PlazoMeses").val()
+            };
+
+            if (!datos.NombreContrato) { alert("El nombre del contrato es obligatorio."); return; }
+
+            $.post('@Url.Action("CrearDesdeSolicitud", "Contratos")', datos)
+                .done(function (resp) {
+                    if (resp.success) {
+                        $("#ContratoId").append($('<option>', {
+                            value: resp.id, text: resp.nombre, selected: true
+                        }));
+                        $("#modalContrato").modal('hide');
+                        $("#formContrato")[0].reset();
+                        $('#modalCrearSolicitud').modal('show');
+                    } else {
+                        alert("Error: " + resp.message);
+                    }
+                })
+                .fail(function (xhr) {
+                    alert("Error al guardar el contrato: " + xhr.statusText);
+                });
+        });
+
+        // ========= PRECARGA DE SELLADOS POR AUTOMÓVIL =========
+        (function () {
+            const urlBase = '/Planes/sellados/';
+
+            // Delegado (sirve si la vista está en un modal/partial cargado por AJAX)
+            $(document).on('change', '#PlanId', function () {
+                const id = $(this).val();
+                if (!id) { limpiarSellados(); return; }
+                cargarSellados(id);
+            });
+
+            // Si la vista carga directa, precarga si ya hay selección
+            $(function () {
+                const id = $('#PlanId').val();
+                if (id) cargarSellados(id);
+            });
+
+            // Si usás modal: cuando se muestre, también intenta precargar
+            $(document).on('shown.bs.modal', '#modalCrearSolicitud', function () {
+                const id = $('#PlanId').val();
+                if (id) cargarSellados(id);
+            });
+
+            function cargarSellados(PlanId) {
+                $.getJSON(urlBase + PlanId)
+                    .done(function (data) {
+                        setSellados(data.sellado1, data.sellado2);
+                    })
+                    .fail(function (xhr) {
+                        console.error('Error al obtener sellados', xhr.status, xhr.responseText);
+                        limpiarSellados();
+                    });
+            }
+
+            function setSellados(s1, s2) {
+                $('#ValorSellado1').val(s1 ?? 0);
+                $('#ValorSellado2').val(s2 ?? 0);
+            }
+
+            function limpiarSellados() {
+                $('#ValorSellado1').val('');
+                $('#ValorSellado2').val('');
+            }
+        })();
+        // ======================================================
+
+        $(document).on('input', '#codigoAuto', function () {
+            var codigo = $(this).val().toLowerCase();
+            $('#PlanId option').each(function () {
+                var texto = $(this).text().toLowerCase();
+                if (texto.startsWith(codigo)) {
+                    $(this).prop('selected', true).trigger('change');
+                    return false; // corta el loop en la primera coincidencia
+                }
+            });
+        });
+
+    </script>
+}

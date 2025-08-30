@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Solicitud>
+
+<table id="tablaSolicitudes" class="table table-hover table-bordered align-middle">
+    <thead class="table-light">
+        <tr>
+            <th class="text-center" style="width:48px;">Sel.</th>
+            <th>Año</th>
+            <th>ID Solicitud</th>
+            <th>Cliente</th>
+            <th>DNI</th>
+            <th>Dirección</th>
+            <th>Provincia</th>
+            <th>Localidad</th>
+            <th>Teléfono</th>
+            <th>Vendedor</th>
+            <th>Supervisor</th>
+            <th>Jefe Ventas</th>
+            <th>Región</th>
+            <th>Fecha Carga</th>
+            <th>Fecha Suscripción</th>
+            <th>Cuotas Pagadas</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            string filaColor = item.EstadoId switch
+            {
+                1 => "table-warning", // amarillo
+                2 => "table-success", // verde
+                3 => "table-danger",  // rojo
+                _ => ""
+            };
+
+            <tr class="fila-solicitud @filaColor" data-id="@item.SolicitudId" style="cursor: pointer;">
+                <td class="text-center">
+                    <input class="form-check-input seleccionar"
+                           type="radio"
+                           name="seleccion"
+                           value="@item.SolicitudId"
+                           aria-label="Seleccionar solicitud @item.SolicitudId" />
+                </td>
+                <td>@(item.FechaCarga?.ToString("yyyy") ?? "")</td>
+                <td>@item.NumeroSolicitud</td>
+                <td>@(item.Cliente?.ApellidoYNombre ?? "—")</td>
+                <td>@(item.Cliente?.Dni ?? "—")</td>
+                <td>@(item.Cliente?.Direccion ?? "—")</td>
+                <td>@(item.Cliente?.Localidad?.Provincia?.NombreProvincia ?? "—")</td>
+                <td>@(item.Cliente?.Localidad?.NombreLocalidad ?? "—")</td>
+                <td>@(item.Cliente?.TelefonoCelular ?? "—")</td>
+                <td>@(item.Vendedor?.NombreCompleto ?? "—")</td>
+                <td>@(item.Supervisor?.NombreCompleto ?? "—")</td>
+                <td>@(item.JefeVentas?.NombreCompleto ?? "—")</td>
+                <td>@(item.Cliente?.Localidad?.Region?.NombreRegion ?? "—")</td>
+                <td>@(item.FechaCarga?.ToString("dd/MM/yyyy") ?? "")</td>
+                <td>@(item.FechaSuscripcion?.ToString("dd/MM/yyyy") ?? "")</td>
+                <td>
+                    @(
+                        item.Cuotas != null
+                        ? item.Cuotas.Count(c => c.Cobros != null && c.Cobros.Any())
+                        : 0
+                        )
+                </td> <!-- 👈 NUEVA CELDA -->
+                <td>@(item.Estado?.NombreEstado ?? "—")</td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Resumen -->
+<div class="mt-3 d-flex justify-content-end">
+    <div class="border rounded p-3 bg-light d-flex gap-4">
+        <div><strong>Registros:</strong>  @Model.Count()</div>
+    </div>
+</div>

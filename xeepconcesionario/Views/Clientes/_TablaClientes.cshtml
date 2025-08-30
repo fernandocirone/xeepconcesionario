@@ -1,0 +1,35 @@
+﻿<table class="table table-hover table-striped table-bordered align-middle w-100">
+    <thead class="table-dark text-center">
+        <tr>
+            <th>Apellido y Nombre</th>
+            <th>DNI</th>
+            <th>Teléfono Fijo</th>
+            <th>Teléfono Móvil</th>
+            <th>E-mail</th>
+            <th>F. de Nacimiento</th>
+            <th>Dirección</th>
+            <th>Localidad</th>
+            <th>Region</th>
+            <th>Provincia</th>
+            <th>Barrio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="fila-cliente" data-id="@item.ClienteId" style="cursor:pointer;">
+                <td>@item.ApellidoYNombre</td>
+                <td>@item.Dni</td>
+                <td>@item.TelefonoFijo</td>
+                <td>@item.TelefonoCelular</td>
+                <td>@item.Mail</td>
+                <td>@item.FechaNacimiento?.ToShortDateString()</td>
+                <td>@item.Direccion</td>
+                <td>@item.Localidad?.NombreLocalidad</td>
+                <td>@item.Localidad?.Region?.NombreRegion</td>
+                <td>@item.Localidad?.Provincia?.NombreProvincia</td>
+                <td>@item.Barrio</td>
+            </tr>
+        }
+    </tbody>
+</table>
