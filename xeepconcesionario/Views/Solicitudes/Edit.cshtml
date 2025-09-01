@@ -93,9 +93,9 @@
             <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
         </div>
 
-        <!-- Automóvil -->
+        <!-- Plan -->
         <div class="col-md-6">
-            <label asp-for="PlanId" class="form-label">Automóvil</label>
+            <label asp-for="PlanId" class="form-label">Plan</label>
             <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
             <span asp-validation-for="PlanId" class="text-danger"></span>
         </div>
@@ -247,7 +247,7 @@
                 });
         });
 
-        // --- Precarga de sellados por automóvil
+        // --- Precarga de sellados por Plan
         (function () {
             const urlBase = '/Planes/sellados/';
 
@@ -285,7 +285,7 @@
             }
         })();
 
-        // --- Búsqueda por código en el select de automóvil
+        // --- Búsqueda por código en el select de Plan
         $(document).on('input', '#codigoAuto', function () {
             const codigo = $(this).val().trim().toLowerCase();
             if (!codigo) return;

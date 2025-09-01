@@ -68,35 +68,20 @@
         <!-- Usuario (quien carga) -->
         <input type="hidden" asp-for="UsuarioId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
 
-        <!-- Cliente: existente o nuevo -->
-        <div class="col-12">
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" asp-for="CrearClienteNuevo" type="radio" value="false" id="rbCliExistente" checked />
-                <label class="form-check-label" for="rbCliExistente">Cliente existente</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" asp-for="CrearClienteNuevo" type="radio" value="true" id="rbCliNuevo" />
-                <label class="form-check-label" for="rbCliNuevo">Nuevo cliente</label>
-            </div>
-        </div>
-
-        <!-- Cliente existente -->
-        <div class="col-md-6" id="secCliExistente">
-            <label asp-for="ClienteId" class="form-label">Cliente</label>
-            <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.ClienteId"></select>
-            <span asp-validation-for="ClienteId" class="text-danger"></span>
+        <div class="col-12 border rounded p-3 bg-light">
+            <label style="font-weight: bold">DATOS CLIENTE</label>
         </div>
 
         <!-- Cliente nuevo -->
-        <div class="col-12 border rounded p-3 bg-light" id="secCliNuevo" style="display:none;">
+        <div class="col-12 border rounded p-3 bg-light" id="secCliNuevo">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.ApellidoYNombre" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.ApellidoYNombre" class="form-control" />
+                    <label asp-for="ClienteNuevo.Dni" class="form-label">DNI</label>
+                    <input asp-for="ClienteNuevo.Dni" class="form-control" />
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Dni" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Dni" class="form-control" />
+                    <label asp-for="ClienteNuevo.ApellidoYNombre" class="form-label">Apllido y Nombre</label>
+                    <input asp-for="ClienteNuevo.ApellidoYNombre" class="form-control" />
                 </div>
                 <div class="col-md-6">
                     <label asp-for="ClienteNuevo.TelefonoFijo" class="form-label"></label>
@@ -184,15 +169,20 @@
             </div>
         </div>
 
+        <div class="col-12 border rounded p-3 bg-light">
+            <label style="font-weight: bold">DATOS PLAN</label>
+        </div>
+
+
         <!-- Búsqueda por código -->
         <div class="col-md-6">
             <label for="codigoAuto" class="form-label">Buscar por código</label>
             <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
         </div>
 
-        <!-- Automóvil -->
+        <!-- Plan -->
         <div class="col-md-6">
-            <label asp-for="PlanId" class="form-label">Automóvil</label>
+            <label asp-for="PlanId" class="form-label">Plan</label>
             <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
             <span asp-validation-for="PlanId" class="text-danger"></span>
         </div>
@@ -297,19 +287,187 @@
     </div>
 </div>
 
+<!-- Modal: Cliente ya existente con solicitudes -->
+<div class="modal fade" id="modalClienteExiste" tabindex="-1" aria-labelledby="modalClienteExisteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-warning-subtle">
+                <h5 id="modalClienteExisteLabel" class="modal-title">
+                    ⚠️ Cliente existente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    El DNI <strong id="dniModalTxt"></strong> corresponde a
+                    <strong id="nombreClienteTxt"></strong>.
+                </p>
+                <p class="mb-3">
+                    Este cliente ya tiene <strong id="cantSolicitudesTxt">0</strong> solicitud(es) registrada(s):
+                </p>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle" id="tablaSolicitudesCliente">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">N° Solicitud</th>
+                                <th>Estado</th>
+                                <th style="width: 160px;">Fecha</th>
+                                <th style="width: 120px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody><!-- se llena por JS --></tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info mt-3" id="sinSolicitudesMsg" style="display:none;">
+                    No se encontraron solicitudes previas para este cliente.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a id="btnVerListaCliente" class="btn btn-outline-secondary" href="#" target="_blank">
+                    <i class="bi bi-list-ul"></i> Ver todas las solicitudes del cliente
+                </a>
+                <button type="button"
+                        class="btn btn-primary"
+                        data-bs-dismiss="modal">
+                    Continuar de todos modos
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-    <script>
-        // Toggle cliente nuevo/existente
-        function syncClienteSections() {
-            const nuevo = document.getElementById('rbCliNuevo').checked;
-            document.getElementById('secCliExistente').style.display = nuevo ? 'none' : '';
-            document.getElementById('secCliNuevo').style.display = nuevo ? '' : 'none';
-        }
-        document.getElementById('rbCliExistente').addEventListener('change', syncClienteSections);
-        document.getElementById('rbCliNuevo').addEventListener('change', syncClienteSections);
-        syncClienteSections();
 
+    <script>
+        // ====== MODAL CLIENTE EXISTE: instancia única ======
+        const modalClienteEl = document.getElementById('modalClienteExiste');
+        const modalCliente = new bootstrap.Modal(modalClienteEl, {
+            backdrop: true,
+            keyboard: true,
+            focus: true
+        });
+
+        // Flags para evitar loop
+        let lastQueriedDni = "";        // último DNI consultado al server
+        let lastModalDni = "";          // último DNI para el que se mostró modal
+        let suppressUntilChange = false; // no consultar hasta que cambie el valor
+
+        // Al cerrar modal: NO devolver foco automáticamente (evita blur/input)
+        modalClienteEl.addEventListener('hidden.bs.modal', () => {
+            // Si preferís devolver foco, mantené esta línea pero queda cubierto por la bandera:
+            // document.getElementById('ClienteNuevo_Dni')?.focus();
+        });
+
+        // Botón "Continuar de todos modos": cerrar modal
+        document
+            .querySelector('#modalClienteExiste .btn.btn-primary[data-bs-dismiss="modal"]')
+            ?.addEventListener('click', () => modalCliente.hide());
+
+        // ====== Hook DNI: busca cliente y muestra modal si corresponde ======
+        (function () {
+            const dniInput = document.getElementById('ClienteNuevo_Dni');
+            if (!dniInput) return;
+
+            let debounceTimer = null;
+
+            function normalizarDni(v) {
+                return (v || "").trim().replaceAll(".", "").replaceAll("-", "");
+            }
+
+            function buscarClientePorDni(dniRaw) {
+                const dni = normalizarDni(dniRaw);
+                if (!dni) return;
+
+                // Si estamos suprimidos hasta que cambie, o ya consultamos lo mismo, salir
+                if (suppressUntilChange) return;
+                if (dni === lastQueriedDni) return;
+
+                lastQueriedDni = dni;
+
+                fetch('@Url.Action("CheckClientePorDni", "Solicitudes")' + '?dni=' + encodeURIComponent(dni), { method: 'GET' })
+                    .then(r => r.ok ? r.json() : Promise.reject(r))
+                    .then(data => {
+                        if (!data || !data.exists) return;
+
+                        // Si ya mostramos modal para este mismo DNI, no re-abrir
+                        if (dni === lastModalDni) return;
+
+                        // Rellenar modal
+                        document.getElementById('dniModalTxt').textContent = dni;
+                        document.getElementById('nombreClienteTxt').textContent = data.nombre ?? '(sin nombre)';
+                        document.getElementById('cantSolicitudesTxt').textContent = data.solicitudesCount ?? 0;
+
+                        const tbody = document.querySelector('#tablaSolicitudesCliente tbody');
+                        tbody.innerHTML = '';
+
+                        const arr = Array.isArray(data.solicitudes) ? data.solicitudes : [];
+                        if (arr.length === 0) {
+                            document.getElementById('sinSolicitudesMsg').style.display = '';
+                        } else {
+                            document.getElementById('sinSolicitudesMsg').style.display = 'none';
+                            for (const s of arr) {
+                                const tr = document.createElement('tr');
+
+                                const tdNum = document.createElement('td');
+                                tdNum.textContent = s.numeroSolicitud ?? s.SolicitudId ?? '—';
+                                tr.appendChild(tdNum);
+
+                                const tdEstado = document.createElement('td');
+                                tdEstado.textContent = s.estado ?? '—';
+                                tr.appendChild(tdEstado);
+
+                                const tdFecha = document.createElement('td');
+                                const fecha = s.fecha ? new Date(s.fecha) : null;
+                                tdFecha.textContent = fecha ? fecha.toLocaleDateString() : '—';
+                                tr.appendChild(tdFecha);
+
+                                const tdAcc = document.createElement('td');
+                                const a = document.createElement('a');
+                                a.className = 'btn btn-sm btn-outline-primary';
+                                a.innerHTML = '<i class="bi bi-eye"></i> Ver';
+                                a.href = '/Solicitudes/Details/' + (s.solicitudId ?? s.SolicitudId);
+                                a.target = '_blank';
+                                tdAcc.appendChild(a);
+                                tr.appendChild(tdAcc);
+
+                                tbody.appendChild(tr);
+                            }
+                        }
+
+                        // Botón "Ver todas"
+                        const btnLista = document.getElementById('btnVerListaCliente');
+                        if (btnLista) btnLista.href = '/Solicitudes?clienteId=' + encodeURIComponent(data.clienteId);
+
+                        // Mostrar modal y activar supresión hasta que el DNI cambie
+                        lastModalDni = dni;
+                        suppressUntilChange = true;
+                        modalCliente.show();
+                    })
+                    .catch(err => console.error('Error CheckClientePorDni:', err));
+            }
+
+            // Solo por INPUT con debounce (quitamos BLUR para evitar loop)
+            dniInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+
+                // Si el valor cambió respecto al último que disparó modal, re-habilitar consulta
+                const valNorm = (dniInput.value || "").trim().replaceAll(".", "").replaceAll("-", "");
+                if (valNorm !== lastModalDni) {
+                    suppressUntilChange = false;
+                }
+
+                debounceTimer = setTimeout(() => buscarClientePorDni(dniInput.value), 600);
+            });
+        })();
+    </script>
+
+    <script>
         // Buscar auto por prefijo de código
         document.getElementById('codigoAuto').addEventListener('input', function () {
             const codigo = this.value.toLowerCase();
@@ -323,6 +481,7 @@
             }
         });
 
+        // Abrir modal de Contrato
         document.getElementById('abrirModalContrato')
             .addEventListener('click', () => {
                 const modal = new bootstrap.Modal(document.getElementById('modalContrato'));
@@ -378,7 +537,7 @@
                     });
             });
 
-        // --- Precarga de sellados por automóvil
+        // --- Precarga de sellados por Plan
         (function () {
             const urlBase = '/Planes/sellados/';
 

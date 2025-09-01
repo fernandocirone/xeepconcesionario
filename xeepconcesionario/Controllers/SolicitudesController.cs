@@ -43,13 +43,14 @@ namespace xeepconcesionario.Controllers
             string? provincia,
             string? localidad,
             string? region,
-            string? numeroSolicitud)
+            string? numeroSolicitud,
+            int? clienteId)
         {
             // Query con todos los filtros unificados
             var q = BuildQuery(clienteNombre, estado, vendedorNombre, supervisorNombre, jefeVentasNombre,
                                estadoId, condicionVentaId, tipoBajaId, PlanTexto,
                                fechaCargaDesde, fechaCargaHasta, dni, telefono,
-                               provincia, localidad, region, numeroSolicitud)
+                               provincia, localidad, region, numeroSolicitud, clienteId)
                     .AsNoTracking();
 
             // Combos rápidos de la vista de listado (si los usás)
@@ -59,6 +60,7 @@ namespace xeepconcesionario.Controllers
             ViewBag.CondicionVentaId = new SelectList(await _context.CondicionesVenta.AsNoTracking().OrderBy(c => c.NombreCondicionVenta).ToListAsync(), "CondicionVentaId", "NombreCondicionVenta", condicionVentaId);
             ViewBag.TipoBajaId = new SelectList(await _context.TiposBaja.AsNoTracking().OrderBy(t => t.NombreTipoBaja).ToListAsync(), "TipoBajaId", "NombreTipoBaja", tipoBajaId);
             ViewBag.EstadoId = new SelectList(await _context.Estados.AsNoTracking().OrderBy(e => e.NombreEstado).ToListAsync(), "EstadoId", "NombreEstado", estadoId);
+            ViewBag.ClienteIdFiltro = clienteId; // ➕ opcional
 
             // Guardar valores de filtros (para que queden en la UI)
             ViewBag.ClienteNombre = clienteNombre;
@@ -321,7 +323,7 @@ namespace xeepconcesionario.Controllers
 
             // Validaciones mínimas
             if (vm.PlanId == 0)
-                ModelState.AddModelError(nameof(vm.PlanId), "Debe seleccionar un automóvil.");
+                ModelState.AddModelError(nameof(vm.PlanId), "Debe seleccionar un Plan.");
 
             if (!vm.CrearClienteNuevo && (!vm.ClienteId.HasValue || vm.ClienteId.Value <= 0))
                 ModelState.AddModelError(nameof(vm.ClienteId), "Debe seleccionar un cliente o cargar uno nuevo.");
@@ -380,7 +382,7 @@ namespace xeepconcesionario.Controllers
                 // 4) Importe de cuota
                 var auto = await _context.Planes.AsNoTracking()
                     .FirstOrDefaultAsync(a => a.PlanId == vm.PlanId)
-                    ?? throw new InvalidOperationException("No se encontró el automóvil seleccionado.");
+                    ?? throw new InvalidOperationException("No se encontró el Plan seleccionado.");
 
                 decimal importe = vm.ImporteCuota ?? auto.AdelantoMensual;
                 if (importe <= 0) throw new InvalidOperationException("El importe de la cuota calculado es inválido (<= 0).");
@@ -613,12 +615,12 @@ namespace xeepconcesionario.Controllers
             string? provincia,
             string? localidad,
             string? region,
-            string? numeroSolicitud)
+            string? numeroSolicitud, int? clienteId)
         {
             var solicitudes = await BuildQuery(clienteNombre, estado, vendedorNombre, supervisorNombre, jefeVentasNombre,
                                                estadoId, condicionVentaId, tipoBajaId, PlanTexto,
                                                fechaCargaDesde, fechaCargaHasta, dni, telefono,
-                                               provincia, localidad, region, numeroSolicitud)
+                                               provincia, localidad, region, numeroSolicitud, clienteId)
                                 .AsNoTracking()
                                 .OrderByDescending(s => s.FechaCarga)
                                 .ToListAsync();
@@ -707,7 +709,8 @@ namespace xeepconcesionario.Controllers
             string? provincia,
             string? localidad,
             string? region,
-            string? numeroSolicitud)
+            string? numeroSolicitud,
+            int? clienteId)
         {
             var q = _context.Solicitudes
                 .Include(s => s.Cuotas).ThenInclude(c => c.Cobros)
@@ -729,6 +732,9 @@ namespace xeepconcesionario.Controllers
                 q = q.Where(s => s.Cliente != null &&
                                  EF.Functions.ILike(s.Cliente.ApellidoYNombre!, like));
             }
+
+            if (clienteId.HasValue)
+                q = q.Where(s => s.ClienteId == clienteId.Value);
 
             if (!string.IsNullOrWhiteSpace(estado))
             {
@@ -840,5 +846,48 @@ namespace xeepconcesionario.Controllers
 
             return q;
         }
+
+        // =============== API: CHECK CLIENTE POR DNI ===============
+        [HttpGet]
+        public async Task<IActionResult> CheckClientePorDni(string dni)
+        {
+            if (string.IsNullOrWhiteSpace(dni))
+                return Json(new { exists = false });
+
+            // Normalizar DNI (sin puntos/guiones/espacios)
+            dni = dni.Trim()
+                     .Replace(".", string.Empty)
+                     .Replace("-", string.Empty);
+
+            var cliente = await _context.Clientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Dni == dni);
+
+            if (cliente == null)
+                return Json(new { exists = false });
+
+            var solicitudes = await _context.Solicitudes
+                .AsNoTracking()
+                .Where(s => s.ClienteId == cliente.ClienteId)
+                .OrderByDescending(s => s.FechaCarga)
+                .Select(s => new
+                {
+                    s.SolicitudId,
+                    s.NumeroSolicitud,
+                    Estado = s.Estado != null ? s.Estado.NombreEstado : "—",
+                    Fecha = s.FechaCarga
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                exists = true,
+                clienteId = cliente.ClienteId,
+                nombre = cliente.ApellidoYNombre,
+                solicitudesCount = solicitudes.Count,
+                solicitudes
+            });
+        }
+
     }
 }

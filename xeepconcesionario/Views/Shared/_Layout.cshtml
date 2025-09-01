@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,104 +11,270 @@
     <link rel="stylesheet" href="~/xeepconcesionario.styles.css" asp-append-version="true" />
     <link rel="icon" type="image/jpg" href="~/images/logoxeep.jpg" />
 
-
     <style>
-        /* Navbar personalizado */
-        .navbar {
-            background: linear-gradient(90deg, #008085, #0069d9);
+        :root{
+            --sidebar-w: 220px;
+            --sidebar-w-collapsed: 64px;
+            --brand-h: 56px;
         }
 
-        .navbar-brand {
+        body {
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, #008085, #0069d9);
+            color: #fff;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar__brand {
+            height: var(--brand-h);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: 0 1rem;
             font-weight: 700;
-            color: #fff !important;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255,255,255,.15);
         }
 
-        .navbar-nav .nav-link {
-            color: #e0e0e0 !important;
-            margin-right: .75rem;
+        .sidebar__toggle {
+            margin-left: auto;
+            border: 0;
+            background: transparent;
+            color: #fff;
+            font-size: 1.25rem;
+            line-height: 1;
         }
 
-            .navbar-nav .nav-link:hover {
-                color: #ffffff !important;
-                font-weight: 500;
-            }
+        .sidebar .nav {
+            padding: .5rem 0;
+        }
 
- 
+        .sidebar .nav-link {
+            color: #e0e0e0;
+            padding: .6rem .95rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            white-space: nowrap;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,.10);
+            color: #fff;
+        }
 
+        .nav-ico {
+            width: 1.5rem;
+            display: inline-flex;
+            justify-content: center;
+        }
+        .nav-text { overflow: hidden; text-overflow: ellipsis; }
 
-        /* Footer */
+        .sidebar__footer {
+            margin-top: auto;
+            padding: .75rem;
+            border-top: 1px solid rgba(255,255,255,.15);
+        }
+
+        /* ===== Content ===== */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .content__inner {
+            padding: 1rem;
+        }
         footer {
             background-color: #004085;
             color: #ddd;
             padding: 1rem 0;
+            text-align: center;
         }
 
-            footer a {
-                color: #9ec5fe;
-                text-decoration: none;
-            }
+        /* ===== Collapsed (desktop) ===== */
+        body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-w-collapsed);
+        }
+        body.sidebar-collapsed .nav-text,
+        body.sidebar-collapsed .sidebar__brand .brand-text {
+            display: none;
+        }
+        body.sidebar-collapsed .sidebar__brand { justify-content: center; }
+        body.sidebar-collapsed .sidebar__toggle { margin: 0; }
 
-                footer a:hover {
-                    text-decoration: underline;
-                }
+        /* ===== Responsive (mobile < 992px): offcanvas ===== */
+        @@media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed;
+                left: 0; top: 0;
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+                z-index: 1040;
+            }
+            body.sidebar-open .sidebar {
+                transform: translateX(0);
+            }
+            /* Backdrop simple */
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,.35);
+                z-index: 1030;
+                display: none;
+            }
+            body.sidebar-open .sidebar-backdrop { display: block; }
+            /* En móvil no colapsamos a mini; ignoramos collapsed */
+            body.sidebar-collapsed .sidebar { width: var(--sidebar-w); }
+        }
+
+        /* Botón hamburguesa fijo en top de content en móvil */
+        .topbar {
+            height: var(--brand-h);
+            display: none;
+            align-items: center;
+            gap: .5rem;
+            padding: 0 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        @@media (max-width: 991.98px) {
+            .topbar { display: flex; }
+        }
     </style>
 </head>
 <body>
-    <!-- NAVBAR -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    🚗 Automotores
+    <!-- Backdrop para móvil -->
+    <div class="sidebar-backdrop" id="sb-backdrop"></div>
 
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#mainNavbar" aria-controls="mainNavbar"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <a class="sidebar__brand" asp-area="" asp-controller="Home" asp-action="Index">
+            <span class="nav-ico">🚗</span>
+            <span class="brand-text">Automotores</span>
+            <button class="sidebar__toggle" id="btn-toggle" aria-label="Colapsar menú" title="Colapsar menú">☰</button>
+        </a>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Solicitudes" asp-action="Index">📄 Solicitudes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Clientes" asp-action="Index">👥 Clientes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Planes" asp-action="Index">🚘 Automóviles</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cobros" asp-action="Index">💵 Cobros</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">👤 Usuarios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Configuraciones" asp-action="Index">⚙️ Configuraciones</a>
-                            </li>
-                        }
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
-            </div>
-        </nav>
-    </header>
+        <ul class="nav flex-column">
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString()=="Solicitudes" ? "active" : "")"
+                       asp-controller="Solicitudes" asp-action="Index">
+                        <span class="nav-ico">📄</span><span class="nav-text">Solicitudes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString()=="Clientes" ? "active" : "")"
+                       asp-controller="Clientes" asp-action="Index">
+                        <span class="nav-ico">👥</span><span class="nav-text">Clientes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString()=="Planes" ? "active" : "")"
+                       asp-controller="Planes" asp-action="Index">
+                        <span class="nav-ico">🚘</span><span class="nav-text">Planes</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString()=="Cobros" ? "active" : "")"
+                       asp-controller="Cobros" asp-action="Index">
+                        <span class="nav-ico">💵</span><span class="nav-text">Cobros</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                       asp-area="Identity" asp-page="/Account/Register">
+                        <span class="nav-ico">👤</span><span class="nav-text">Usuarios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString()=="Configuraciones" ? "active" : "")"
+                       asp-controller="Configuraciones" asp-action="Index">
+                        <span class="nav-ico">⚙️</span><span class="nav-text">Configuraciones</span>
+                    </a>
+                </li>
+            }
+        </ul>
+
+        <div class="sidebar__footer">
+            <partial name="_LoginPartial" />
+        </div>
+
+    </aside>
 
     <!-- CONTENIDO -->
-    <div class="container-fluid">
-        <main style="margin-top:10px" role="main">
+    <div class="content">
+        <!-- Topbar solo móvil -->
+        <div class="topbar">
+            <button class="btn btn-outline-secondary btn-sm" id="btn-open" aria-label="Abrir menú">☰</button>
+            <strong>@ViewData["Title"]</strong>
+        </div>
+
+        <main class="content__inner" role="main">
             @RenderBody()
         </main>
     </div>
-
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        (function () {
+            const body = document.body;
+            const btnToggle = document.getElementById('btn-toggle'); // botón dentro del brand (desktop)
+            const btnOpen = document.getElementById('btn-open');     // botón en topbar (mobile)
+            const backdrop = document.getElementById('sb-backdrop');
+
+            // Restaurar preferencia de colapso (solo desktop)
+            const saved = localStorage.getItem('sidebar-collapsed');
+            if (saved === '1' && window.matchMedia('(min-width: 992px)').matches) {
+                body.classList.add('sidebar-collapsed');
+            }
+
+            // Click en toggle (desktop: colapsa; móvil: abre/cierra)
+            btnToggle?.addEventListener('click', function () {
+                if (window.matchMedia('(max-width: 991.98px)').matches) {
+                    body.classList.toggle('sidebar-open');
+                } else {
+                    body.classList.toggle('sidebar-collapsed');
+                    localStorage.setItem('sidebar-collapsed', body.classList.contains('sidebar-collapsed') ? '1' : '0');
+                }
+            });
+
+            // Abrir en móvil
+            btnOpen?.addEventListener('click', function () {
+                body.classList.add('sidebar-open');
+            });
+
+            // Cerrar al hacer click en backdrop
+            backdrop?.addEventListener('click', function () {
+                body.classList.remove('sidebar-open');
+            });
+
+            // Al cambiar tamaño, si pasa a desktop, cerrar offcanvas
+            window.addEventListener('resize', function () {
+                if (window.matchMedia('(min-width: 992px)').matches) {
+                    body.classList.remove('sidebar-open');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

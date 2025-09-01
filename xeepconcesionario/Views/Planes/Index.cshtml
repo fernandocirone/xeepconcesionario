@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Plan>
 
 @{
-    ViewData["Title"] = "Automóviles";
+    ViewData["Title"] = "Planes";
 }
 
 <div class="container-fluid">
@@ -10,7 +10,7 @@
         <!-- Alto total del bloque -->
         <!-- Encabezado y filtros -->
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h2 class="text-primary m-0">AUTOMÓVILES</h2>
+            <h2 class="text-primary m-0">PLANES</h2>
 
             <div class="d-flex align-items-center gap-2 ms-auto">
                 <input type="text" class="form-control form-control-sm" id="filtroModelo" placeholder="Buscar por modelo" />
@@ -19,7 +19,7 @@
 
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearPlan">
-                    <i class="bi bi-car-front-fill"></i> Nuevo Automóvil
+                    <i class="bi bi-car-front-fill"></i> Nuevo Plan
                 </button>
 
             </div>
@@ -46,7 +46,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content shadow">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalCrearPlanLabel">Nuevo Automóvil</h5>
+                <h5 class="modal-title" id="modalCrearPlanLabel">Nuevo Plan</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
