@@ -41,7 +41,6 @@ namespace xeepconcesionario.Controllers
                 .Include(c => c.Usuario)
                 .Include(c => c.Solicitud).ThenInclude(s => s.Cliente)
                 .Include(c => c.Cuota)
-                .Include(c => c.Cobrador)
                 .Include(c => c.Solicitud.Supervisor)
                 .AsNoTracking()
                 .Where(c => c.Fecha >= desde && c.Fecha < hastaExclusivo);
@@ -96,7 +95,6 @@ namespace xeepconcesionario.Controllers
             }
 
             var cobro = await _context.Cobros
-                .Include(c => c.Cobrador)
                 .Include(c => c.Cuota)
                 .Include(c => c.Solicitud)
                 .FirstOrDefaultAsync(m => m.CobroId == id);
@@ -295,7 +293,6 @@ namespace xeepconcesionario.Controllers
             {
                 return NotFound();
             }
-            ViewData["CobradorId"] = new SelectList(_context.Cobradores, "CobradorId", "CobradorId", cobro.CobradorId);
             ViewData["CuotaId"] = new SelectList(_context.Cuotas, "CuotaId", "CuotaId", cobro.CuotaId);
             ViewData["SolicitudId"] = new SelectList(_context.Solicitudes, "SolicitudId", "SolicitudId", cobro.SolicitudId);
             return View(cobro);
@@ -333,7 +330,6 @@ namespace xeepconcesionario.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CobradorId"] = new SelectList(_context.Cobradores, "CobradorId", "CobradorId", cobro.CobradorId);
             ViewData["CuotaId"] = new SelectList(_context.Cuotas, "CuotaId", "CuotaId", cobro.CuotaId);
             ViewData["SolicitudId"] = new SelectList(_context.Solicitudes, "SolicitudId", "SolicitudId", cobro.SolicitudId);
             return View(cobro);
@@ -348,7 +344,6 @@ namespace xeepconcesionario.Controllers
             }
 
             var cobro = await _context.Cobros
-                .Include(c => c.Cobrador)
                 .Include(c => c.Cuota)
                 .Include(c => c.Solicitud)
                 .FirstOrDefaultAsync(m => m.CobroId == id);

@@ -1,61 +1,456 @@
-﻿@model Cuota
+﻿@model IEnumerable<Cuota>
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "~/Views/Clientes/Index.cshtml";
+    ViewData["Title"] = "Cuotas";
+
+    decimal totalMonto = Model?.Sum(c => c.MontoCuota) ?? 0m;
+    decimal totalSaldo = Model?.Sum(c => c.SaldoCuota) ?? 0m;
+    decimal totalPagado = totalMonto - totalSaldo;
+
+    // Valores de filtros (los setea el controller por ViewBag)
+    string fechaDesde = ViewBag.FechaDesde ?? DateTime.Today.ToString("yyyy-MM-dd");
+    string fechaHasta = ViewBag.FechaHasta ?? DateTime.Today.ToString("yyyy-MM-dd");
+    string numeroCuota = ViewBag.NumeroCuota ?? "";
+    string nombreSupervisor = ViewBag.NombreSupervisor ?? "";
+    string estado = ViewBag.Estado ?? "todas"; // "todas" | "pendientes" | "pagadas"
+    string cliente = ViewBag.Cliente ?? "";
 }
 
-<h1>Details</h1>
+<div class="container-fluid">
 
-<div>
-    <h4>Cuota</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Numerocuota)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Numerocuota)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PlazoMeses)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PlazoMeses)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MontoCuota)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MontoCuota)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SaldoCuota)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SaldoCuota)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaVencimiento)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaVencimiento)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaPago)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaPago)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Solicitud)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Solicitud.SolicitudId)
-        </dd>
-    </dl>
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="text-primary m-0">
+            CUOTAS
+            @if (ViewBag.SolicitudId != null)
+            {
+                <small>(Solicitud @ViewBag.SolicitudId) - @ViewBag.Solicitud?.Cliente?.ApellidoYNombre</small>
+            }
+        </h2>
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="Solicitudes" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left-circle"></i> Volver a Solicitudes
+            </a>
+            <button type="button" id="btnEditarMasivo" class="btn btn-warning btn-sm">
+                <i class="bi bi-pencil-square"></i> Editar cuotas masivamente
+            </button>
+            <button type="button" id="btnCobrarPorMonto" class="btn btn-success btn-sm">
+                <i class="bi bi-cash-stack"></i> Cobrar por Monto
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="mb-3 d-flex align-items-end gap-2 flex-wrap">
+        <input type="hidden" name="solicitudId" value="@ViewBag.SolicitudId" />
+
+        <div>
+            <label for="fechaDesde" class="form-label">Vto. Desde</label>
+            <input type="date" id="fechaDesde" name="fechaDesde" value="@fechaDesde" class="form-control form-control-sm" />
+        </div>
+        <div>
+            <label for="fechaHasta" class="form-label">Vto. Hasta</label>
+            <input type="date" id="fechaHasta" name="fechaHasta" value="@fechaHasta" class="form-control form-control-sm" />
+        </div>
+        <div>
+            <label for="numeroCuota" class="form-label">N° Cuota</label>
+            <input type="number" id="numeroCuota" name="numeroCuota" value="@numeroCuota" class="form-control form-control-sm" min="1" />
+        </div>
+        <div>
+            <label for="estado" class="form-label">Estado</label>
+            <select id="estado" name="estado" class="form-select form-select-sm">
+                <option value="todas" selected="@(estado == "todas" ? "selected" : null)">Todas</option>
+                <option value="pendientes" selected="@(estado == "pendientes" ? "selected" : null)">Pendientes</option>
+                <option value="pagadas" selected="@(estado == "pagadas" ? "selected" : null)">Pagadas</option>
+            </select>
+
+        </div>
+        <div>
+            <label for="cliente" class="form-label">Cliente</label>
+            <input type="text" id="cliente" name="cliente" value="@cliente" class="form-control form-control-sm" placeholder="Apellido y nombre" />
+        </div>
+        <div>
+            <label for="nombreSupervisor" class="form-label">Supervisor</label>
+            <input type="text" id="nombreSupervisor" name="nombreSupervisor" value="@nombreSupervisor" class="form-control form-control-sm" />
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+
+        <!-- Exportar a Excel -->
+        <div>
+            <a asp-action="ExportarExcel"
+               asp-route-solicitudId="@ViewBag.SolicitudId"
+               asp-route-fechaDesde="@fechaDesde"
+               asp-route-fechaHasta="@fechaHasta"
+               asp-route-numeroCuota="@numeroCuota"
+               asp-route-estado="@estado"
+               asp-route-cliente="@cliente"
+               asp-route-nombreSupervisor="@nombreSupervisor"
+               class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+            </a>
+
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div id="tablaCuotas" class="table-responsive" style="max-height:65vh; overflow:auto;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info m-0">No hay cuotas registradas con ese filtro.</div>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">N° Cuota</th>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">Monto</th>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">Saldo</th>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">Vencimiento</th>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">Fecha Pago</th>
+                        <th scope="col" style="position:sticky; top:0; z-index:2;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cuota in Model)
+                    {
+                        <tr class="fila-cuota" data-id="@cuota.CuotaId" style="cursor:pointer;">
+                            <td>@cuota.Numerocuota</td>
+                            <td>@cuota.MontoCuota.ToString("C")</td>
+                            <td>@cuota.SaldoCuota.ToString("C")</td>
+                            <td>@cuota.FechaVencimiento.ToString("dd/MM/yyyy")</td>
+                            <td>@(cuota.FechaPago?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td class="text-nowrap">
+                                @if (cuota.SaldoCuota > 0)
+                                {
+                                    <button type="button"
+                                            class="btn btn-success btn-sm btn-cobrar"
+                                            title="Registrar cobro"
+                                            data-cuota-id="@cuota.CuotaId"
+                                            data-solicitud-id="@cuota.SolicitudId"
+                                            data-numero="@cuota.Numerocuota"
+                                            data-saldo="@cuota.SaldoCuota"
+                                            data-vto="@cuota.FechaVencimiento.ToString("dd/MM/yyyy")">
+                                        <i class="bi bi-cash-coin"></i> Cobrar
+                                    </button>
+                                }
+                                else if (cuota.FechaPago != null)
+                                {
+                                    <a asp-controller="Cobros"
+                                       asp-action="ReciboPorCuota"
+                                       asp-route-cuotaId="@cuota.CuotaId"
+                                       target="_blank"
+                                       class="btn btn-primary btn-sm"
+                                       title="Imprimir recibo">
+                                        <i class="bi bi-printer"></i> Recibo
+                                    </a>
+                                }
+                                <a asp-controller="Cuotas"
+                                   asp-action="Edit"
+                                   asp-route-id="@cuota.CuotaId"
+                                   asp-route-solicitudId="@cuota.SolicitudId"
+                                   class="btn btn-warning btn-sm"
+                                   title="Editar cuota">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Resumen de Totales -->
+    <div class="mt-3 d-flex justify-content-end">
+        <div class="border rounded p-3 bg-light d-flex gap-4">
+            <div><strong>Total cuotas:</strong> @totalMonto.ToString("C")</div>
+            <div><strong>Pagado:</strong> @totalPagado.ToString("C")</div>
+            <div><strong>Saldo:</strong> @totalSaldo.ToString("C")</div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.CuotaId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+
+<!-- Modal Cobro -->
+<div class="modal fade" id="cobroModal" tabindex="-1" aria-labelledby="cobroModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formCobro" asp-controller="Cobros" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cobroModalLabel">Registrar Cobro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-2 small text-muted" id="cobroInfoCuota"></div>
+
+                    <!-- Hidden -->
+                    <input type="hidden" name="SolicitudId" id="Cobro_SolicitudId" />
+                    <input type="hidden" name="CuotaId" id="Cobro_CuotaId" />
+
+                    <div class="mb-3">
+                        <label for="Cobro_Fecha" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="Cobro_Fecha" name="Fecha" required />
+                    </div>
+
+                    <div class="mb-1">
+                        <label for="Cobro_Monto" class="form-label">Importe</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="Cobro_Monto" name="Monto" required />
+                    </div>
+                    <div id="Cobro_MontoHelp" class="form-text">Sugerimos el saldo de la cuota.</div>
+                    <div id="Cobro_MontoError" class="text-danger small d-none">El importe no puede superar el saldo ni ser 0.</div>
+
+                    <div class="mb-3">
+                        <label for="Cobro_Medio" class="form-label">Medio (opcional)</label>
+                        <input type="text" class="form-control" id="Cobro_Medio" name="Medio" placeholder="Efectivo, Transferencia, etc." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Cobro_Observacion" class="form-label">Observación</label>
+                        <input type="text"
+                               class="form-control"
+                               id="Cobro_Observacion"
+                               name="ObservacionCobro"
+                               placeholder="Detalle u observación del cobro" />
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check2-circle"></i> Registrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Cobro por Monto (Solicitud) -->
+<div class="modal fade" id="cobroPorMontoModal" tabindex="-1" aria-labelledby="cobroPorMontoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formCobroPorMonto" asp-controller="Cobros" asp-action="CobrarPorMonto" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cobroPorMontoLabel">Cobrar por Monto (Solicitud @ViewBag.SolicitudId)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Hidden -->
+                    <input type="hidden" name="solicitudId" id="CPM_SolicitudId" value="@ViewBag.SolicitudId" />
+
+                    <div class="mb-3">
+                        <label for="CPM_Fecha" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="CPM_Fecha" name="fecha" required />
+                    </div>
+
+                    <div class="mb-1">
+                        <label for="CPM_Monto" class="form-label">Monto total a imputar</label>
+                        <input type="number" class="form-control" id="CPM_Monto" name="monto" required />
+                    </div>
+                    <div id="CPM_MontoHelp" class="form-text">
+                        Sugerencia: saldo total pendiente (@totalSaldo.ToString("C")).
+                    </div>
+                    <div id="CPM_MontoError" class="text-danger small d-none"></div>
+
+                    <div class="mb-3">
+                        <label for="CPM_Medio" class="form-label">Medio (opcional)</label>
+                        <input type="text" class="form-control" id="CPM_Medio" name="Medio" placeholder="Efectivo, Transferencia, etc." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Cobro_Observacion" class="form-label">Observación</label>
+                        <input type="text"
+                               class="form-control"
+                               id="Cobro_Observacion"
+                               name="ObservacionCobro"
+                               placeholder="Detalle u observación del cobro" />
+                    </div>
+
+
+                    <div class="small text-muted">
+                        El monto se aplicará desde la cuota más baja con saldo hasta agotarlo.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check2-circle"></i> Confirmar cobro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editarMasivoModal" tabindex="-1" aria-labelledby="editarMasivoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formEditarMasivo" asp-controller="Cuotas" asp-action="EditarMasivo" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="SolicitudId" value="@ViewBag.SolicitudId" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarMasivoLabel">
+                        Editar todas las cuotas (Solicitud @ViewBag.SolicitudId)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="MontoNuevo" class="form-label">Nuevo Monto</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="MontoNuevo" name="MontoNuevo" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="SaldoNuevo" class="form-label">Nuevo Saldo</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="SaldoNuevo" name="SaldoNuevo" required />
+                    </div>
+
+                    <div class="alert alert-warning small">
+                        ⚠️ Estos valores reemplazarán el <strong>monto</strong> y <strong>saldo</strong> de todas las cuotas de la solicitud.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle"></i> Guardar cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        (function () {
+            const modalEl = document.getElementById('cobroModal');
+            let bsModal;
+
+            function showModal() {
+                if (!bsModal) bsModal = new bootstrap.Modal(modalEl);
+                bsModal.show();
+            }
+
+            // Abre modal y completa con datos de la fila
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.btn-cobrar');
+                if (!btn) return;
+
+                const cuotaId = btn.getAttribute('data-cuota-id');
+                const solicitudId = btn.getAttribute('data-solicitud-id');
+                const numero = btn.getAttribute('data-numero');
+                const vto = btn.getAttribute('data-vto');
+                const saldo = parseFloat((btn.getAttribute('data-saldo') || "0").toString().replace(',', '.')) || 0;
+
+                // Hidden
+                document.getElementById('Cobro_SolicitudId').value = solicitudId;
+                document.getElementById('Cobro_CuotaId').value = cuotaId;
+
+                // Fecha hoy (YYYY-MM-DD)
+                const hoy = new Date();
+                const yyyy = hoy.getFullYear();
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                document.getElementById('Cobro_Fecha').value = `${yyyy}-${mm}-${dd}`;
+
+                // Monto sugerido = saldo
+                const inputMonto = document.getElementById('Cobro_Monto');
+                inputMonto.value = saldo.toFixed(2);
+                inputMonto.setAttribute('max', saldo.toFixed(2)); // prevención básica
+
+                // Info
+                const info = document.getElementById('cobroInfoCuota');
+                info.textContent = `Solicitud ${solicitudId} • Cuota Nº ${numero} • Vto: ${vto} • Saldo: ${saldo.toFixed(2)}`;
+
+                // Limpio opcionales y errores
+                document.getElementById('Cobro_Medio').value = '';
+                document.getElementById('Cobro_Observacion').value = '';
+                document.getElementById('Cobro_MontoError').classList.add('d-none');
+
+                showModal();
+            });
+
+            // Validación cliente: monto > 0 y <= saldo
+            document.getElementById('formCobro').addEventListener('submit', function (e) {
+                const saldoMax = parseFloat((document.querySelector('.btn-cobrar[data-cuota-id="' + document.getElementById('Cobro_CuotaId').value + '"]')?.getAttribute('data-saldo') || "0").replace(',', '.')) || 0;
+                const monto = parseFloat((document.getElementById('Cobro_Monto').value || "0").replace(',', '.')) || 0;
+
+                if (monto <= 0 || monto > saldoMax) {
+                    e.preventDefault();
+                    const err = document.getElementById('Cobro_MontoError');
+                    err.textContent = `El importe debe ser mayor a 0 y no superar el saldo (${saldoMax.toFixed(2)}).`;
+                    err.classList.remove('d-none');
+                }
+            });
+        })();
+
+        (function () {
+            // Abrir modal Cobrar por Monto con sugerencias
+            document.getElementById('btnCobrarPorMonto')?.addEventListener('click', function () {
+                const modalEl = document.getElementById('cobroPorMontoModal');
+                const bsModal = new bootstrap.Modal(modalEl);
+                // Fecha hoy
+                const hoy = new Date();
+                const yyyy = hoy.getFullYear();
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                document.getElementById('CPM_Fecha').value = `${yyyy}-${mm}-${dd}`;
+
+                // Sugerir saldo total como monto inicial
+                const sugerido = @totalSaldo.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                const montoInput = document.getElementById('CPM_Monto');
+                montoInput.value = Number(sugerido).toFixed(2);
+
+                // Limpiar errores
+                document.getElementById('CPM_MontoError').classList.add('d-none');
+                document.getElementById('CPM_MontoError').textContent = '';
+
+                bsModal.show();
+            });
+
+            // Validación simple
+            document.getElementById('formCobroPorMonto').addEventListener('submit', function (e) {
+                const monto = parseFloat((document.getElementById('CPM_Monto').value || '0').replace(',', '.')) || 0;
+                if (monto <= 0) {
+                    e.preventDefault();
+                    const err = document.getElementById('CPM_MontoError');
+                    err.textContent = 'El monto debe ser mayor a 0.';
+                    err.classList.remove('d-none');
+                    return;
+                }
+            });
+        })();
+    </script>
+
+    <script>
+        document.getElementById('btnEditarMasivo')?.addEventListener('click', function () {
+            const modalEl = document.getElementById('editarMasivoModal');
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+        });
+    </script>
+
+
+}

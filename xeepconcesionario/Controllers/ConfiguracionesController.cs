@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using xeepconcesionario.Data;
-using xeepconcesionario.Models;
 using xeepconcesionario.Models.Dto;
+using xeepconcesionario.Models;
+using Humanizer;
 
 namespace xeepconcesionario.Controllers
 {
@@ -60,6 +61,16 @@ namespace xeepconcesionario.Controllers
                     await UpsertEstadoActividadAsync(dto);
                     break;
 
+                case "sucursal":
+                    await UpsertSucursalAsync(dto);
+                    break;
+
+                case "tipoactividadvehiculo":
+                    await UpsertTipoActividadVehiculoAsync(dto);
+                    break;
+
+
+
                 default:
                     return BadRequest("Tipo no válido");
             }
@@ -100,6 +111,18 @@ namespace xeepconcesionario.Controllers
                     _context.EstadosActividad.Remove(ea);
                     break;
 
+                case "sucursal":
+                    var s = await _context.Sucursales.FindAsync(id);
+                    if (s == null) return NotFound();
+                    _context.Sucursales.Remove(s);
+                    break;
+
+                case "tipoactividadvehiculo":
+                    var ta = await _context.TiposActividadVehiculo.FindAsync(id);
+                    if (ta == null) return NotFound();
+                    _context.TiposActividadVehiculo.Remove(ta);
+                    break;
+
                 default:
                     return BadRequest("Tipo no válido");
             }
@@ -115,7 +138,7 @@ namespace xeepconcesionario.Controllers
             return tipo?.ToLowerInvariant() switch
             {
                 "estado" => await _context.Estados
-                    .Select(x => new LookupDto { Id = x.EstadoId, Nombre = x.NombreEstado, Tipo = "estado" })
+                    .Select(x => new LookupDto { Id = x.EstadoId, Nombre = x.NombreEstado, Tipo = "estado", Color = x.Color })
                     .OrderBy(x => x.Nombre).ToListAsync(),
 
                 "condicion" or "condicionventa" => await _context.CondicionesVenta
@@ -130,6 +153,14 @@ namespace xeepconcesionario.Controllers
                     .Select(x => new LookupDto { Id = x.EstadoActividadId, Nombre = x.NombreEstadoActividad, Tipo = "estadoactividad" })
                     .OrderBy(x => x.Nombre).ToListAsync(),
 
+                "sucursal" => await _context.Sucursales
+                    .Select(x => new LookupDto { Id = x.Id, Nombre = x.NombreSucursal, Tipo = "sucursal", Direccion = x.Direccion })
+                    .OrderBy(x => x.Nombre).ToListAsync(),
+
+                "tipoactividadvehiculo" => await _context.TiposActividadVehiculo
+                    .Select(x => new LookupDto { Id = x.Id, Nombre = x.NombreTipoActividadVehiculo, Tipo = "tipoactividadvehiculo"})
+                    .OrderBy(x => x.Nombre).ToListAsync(),
+
                 _ => new List<LookupDto>()
             };
         }
@@ -140,7 +171,7 @@ namespace xeepconcesionario.Controllers
             {
                 "estado" => await _context.Estados
                     .Where(x => x.EstadoId == id)
-                    .Select(x => new LookupDto { Id = x.EstadoId, Nombre = x.NombreEstado, Tipo = "estado" })
+                    .Select(x => new LookupDto { Id = x.EstadoId, Nombre = x.NombreEstado, Tipo = "estado", Color = x.Color })
                     .FirstOrDefaultAsync(),
 
                 "condicion" or "condicionventa" => await _context.CondicionesVenta
@@ -158,22 +189,46 @@ namespace xeepconcesionario.Controllers
                     .Select(x => new LookupDto { Id = x.EstadoActividadId, Nombre = x.NombreEstadoActividad, Tipo = "estadoactividad" })
                     .FirstOrDefaultAsync(),
 
+                "sucursal" => await _context.Sucursales
+                    .Where(x => x.Id == id)
+                    .Select(x => new LookupDto { Id = x.Id, Nombre = x.NombreSucursal, Tipo = "sucursal", Direccion = x.Direccion })
+                    .FirstOrDefaultAsync(),
+
+
+                "tipoactividadvehiculo" => await _context.TiposActividadVehiculo
+                    .Where(x => x.Id == id)
+                    .Select(x => new LookupDto { Id = x.Id, Nombre = x.NombreTipoActividadVehiculo, Tipo = "sucursal"})
+                    .FirstOrDefaultAsync(),
+
+
                 _ => null
             };
         }
 
         private async Task UpsertEstadoAsync(LookupDto dto)
         {
+            // Color por defecto si no vino nada
+            var color = string.IsNullOrWhiteSpace(dto.Color) ? "#6c757d" : dto.Color;
+
             if (dto.Id == 0)
-                _context.Estados.Add(new Estado { NombreEstado = dto.Nombre });
+            {
+                _context.Estados.Add(new Estado
+                {
+                    NombreEstado = dto.Nombre,
+                    Color = color
+                });
+            }
             else
             {
                 var e = await _context.Estados.FindAsync(dto.Id);
                 if (e == null) throw new ArgumentException("Estado no encontrado");
                 e.NombreEstado = dto.Nombre;
+                e.Color = color;
+                
                 _context.Estados.Update(e);
             }
         }
+
 
         private async Task UpsertCondicionVentaAsync(LookupDto dto)
         {
@@ -212,6 +267,36 @@ namespace xeepconcesionario.Controllers
                 ea.NombreEstadoActividad = dto.Nombre;
                 _context.EstadosActividad.Update(ea);
             }
+
+        }
+
+        private async Task UpsertTipoActividadVehiculoAsync(LookupDto dto)
+        {
+            if (dto.Id == 0)
+                _context.TiposActividadVehiculo.Add(new TipoActividadVehiculo { NombreTipoActividadVehiculo = dto.Nombre });
+            else
+            {
+                var ea = await _context.TiposActividadVehiculo.FindAsync(dto.Id);
+                if (ea == null) throw new ArgumentException("EstadoActividad no encontrado");
+                ea.NombreTipoActividadVehiculo = dto.Nombre;
+                _context.TiposActividadVehiculo.Update(ea);
+            }
+
+        }
+
+        private async Task UpsertSucursalAsync(LookupDto dto)
+        {
+            if (dto.Id == 0)
+                _context.Sucursales.Add(new Sucursal { NombreSucursal = dto.Nombre, Direccion = dto.Direccion });
+            else
+            {
+                var s = await _context.Sucursales.FindAsync(dto.Id);
+                if (s == null) throw new ArgumentException("Sucursal no encontrada");
+                s.NombreSucursal = dto.Nombre;
+                s.Direccion = dto.Direccion;
+                _context.Sucursales.Update(s);
+            }
+
         }
     }
 }

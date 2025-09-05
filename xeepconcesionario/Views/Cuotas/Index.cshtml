@@ -2,12 +2,18 @@
 
 @{
     ViewData["Title"] = "Cuotas";
-}
 
-@{
     decimal totalMonto = Model?.Sum(c => c.MontoCuota) ?? 0m;
     decimal totalSaldo = Model?.Sum(c => c.SaldoCuota) ?? 0m;
     decimal totalPagado = totalMonto - totalSaldo;
+
+    // Valores de filtros (los setea el controller por ViewBag)
+    string fechaDesde = ViewBag.FechaDesde ?? DateTime.Today.ToString("yyyy-MM-dd");
+    string fechaHasta = ViewBag.FechaHasta ?? DateTime.Today.ToString("yyyy-MM-dd");
+    string numeroCuota = ViewBag.NumeroCuota ?? "";
+    string nombreSupervisor = ViewBag.NombreSupervisor ?? "";
+    string estado = ViewBag.Estado ?? "todas"; // "todas" | "pendientes" | "pagadas"
+    string cliente = ViewBag.Cliente ?? "";
 }
 
 <div class="container-fluid">
@@ -15,47 +21,96 @@
     <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h2 class="text-primary m-0">
-            CUOTAS @if (ViewBag.SolicitudId != null)
-            {
-                <small>(Solicitud @ViewBag.SolicitudId) - @ViewBag.Solicitud.Cliente.ApellidoYNombre</small>
-            }
+            CUOTAS
         </h2>
-
-            <div class="d-flex gap-2">
-                <a asp-controller="Solicitudes" asp-action="Index" class="btn btn-secondary btn-sm">
-                    <i class="bi bi-arrow-left-circle"></i> Volver a Solicitudes
-                </a>
-                <button type="button" id="btnCobrarPorMonto" class="btn btn-success btn-sm">
-                    <i class="bi bi-cash-stack"></i> Cobrar por Monto
-                </button>
-            </div>
     </div>
+
+    <!-- Filtros -->
+    <form method="get" class="mb-3 d-flex align-items-end gap-2 flex-wrap">
+
+        <div>
+            <label for="fechaDesde" class="form-label">Vto. Desde</label>
+            <input type="date" id="fechaDesde" name="fechaDesde" value="@fechaDesde" class="form-control form-control-sm" />
+        </div>
+        <div>
+            <label for="fechaHasta" class="form-label">Vto. Hasta</label>
+            <input type="date" id="fechaHasta" name="fechaHasta" value="@fechaHasta" class="form-control form-control-sm" />
+        </div>
+        <div>
+            <label for="numeroCuota" class="form-label">N° Cuota</label>
+            <input type="number" id="numeroCuota" name="numeroCuota" value="@numeroCuota" class="form-control form-control-sm" min="1" />
+        </div>
+        <div>
+            <label for="estado" class="form-label">Estado</label>
+            <select id="estado" name="estado" class="form-select form-select-sm">
+                <option value="todas" selected="@(estado == "todas" ? "selected" : null)">Todas</option>
+                <option value="pendientes" selected="@(estado == "pendientes" ? "selected" : null)">Pendientes</option>
+                <option value="pagadas" selected="@(estado == "pagadas" ? "selected" : null)">Pagadas</option>
+            </select>
+
+        </div>
+        <div>
+            <label for="cliente" class="form-label">Cliente</label>
+            <input type="text" id="cliente" name="cliente" value="@cliente" class="form-control form-control-sm" placeholder="Apellido y nombre" />
+        </div>
+        <div>
+            <label for="nombreSupervisor" class="form-label">Supervisor</label>
+            <input type="text" id="nombreSupervisor" name="nombreSupervisor" value="@nombreSupervisor" class="form-control form-control-sm" />
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+
+        <!-- Exportar a Excel -->
+        <div>
+            <a asp-action="ExportarExcel"
+               asp-route-fechaDesde="@fechaDesde"
+               asp-route-fechaHasta="@fechaHasta"
+               asp-route-numeroCuota="@numeroCuota"
+               asp-route-estado="@estado"
+               asp-route-cliente="@cliente"
+               asp-route-nombreSupervisor="@nombreSupervisor"
+               class="btn btn-success btn-sm">
+                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+            </a>
+
+        </div>
+    </form>
 
     <!-- Tabla -->
     <div id="tablaCuotas" class="table-responsive" style="max-height:65vh; overflow:auto;">
         @if (Model == null || !Model.Any())
         {
-            <div class="alert alert-info m-0">
-                No hay cuotas registradas para esta solicitud.
-            </div>
+            <div class="alert alert-info m-0">No hay cuotas registradas con ese filtro.</div>
         }
         else
         {
             <table class="table table-sm table-striped table-hover table-bordered align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">N° Cuota</th>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">Monto</th>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">Saldo</th>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">Vencimiento</th>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">Fecha Pago</th>
-                        <th scope="col" style="position:sticky; top:0; z-index:2;">Acciones</th>
+                        <th style="position:sticky; top:0; z-index:2;">Solicitud</th>
+                        <th style="position:sticky; top:0; z-index:2;">Estado</th>
+                        <th style="position:sticky; top:0; z-index:2;">Cliente</th>
+                        <th style="position:sticky; top:0; z-index:2;">Supervisor</th>
+                        <th style="position:sticky; top:0; z-index:2;">N° Cuota</th>
+                        <th style="position:sticky; top:0; z-index:2;">Monto</th>
+                        <th style="position:sticky; top:0; z-index:2;">Saldo</th>
+                        <th style="position:sticky; top:0; z-index:2;">Vencimiento</th>
+                        <th style="position:sticky; top:0; z-index:2;">Fecha Pago</th>
+                        <th style="position:sticky; top:0; z-index:2;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var cuota in Model)
                     {
                         <tr class="fila-cuota" data-id="@cuota.CuotaId" style="cursor:pointer;">
+                            <td>@cuota.Solicitud?.NumeroSolicitud</td>
+                            <td>@cuota.Solicitud?.Estado.NombreEstado</td>
+                            <td>@cuota.Solicitud?.Cliente?.ApellidoYNombre</td>
+                            <td>@cuota.Solicitud?.Supervisor?.NombreCompleto</td>
                             <td>@cuota.Numerocuota</td>
                             <td>@cuota.MontoCuota.ToString("C")</td>
                             <td>@cuota.SaldoCuota.ToString("C")</td>
@@ -64,9 +119,8 @@
                             <td class="text-nowrap">
                                 @if (cuota.SaldoCuota > 0)
                                 {
-                                    <!-- Botón cobrar -->
                                     <button type="button"
-                                            class="btn btn-success btn-cobrar"
+                                            class="btn btn-success btn-sm btn-cobrar"
                                             title="Registrar cobro"
                                             data-cuota-id="@cuota.CuotaId"
                                             data-solicitud-id="@cuota.SolicitudId"
@@ -78,26 +132,32 @@
                                 }
                                 else if (cuota.FechaPago != null)
                                 {
-                                    <!-- Botón imprimir recibo -->
                                     <a asp-controller="Cobros"
                                        asp-action="ReciboPorCuota"
                                        asp-route-cuotaId="@cuota.CuotaId"
                                        target="_blank"
-                                       class="btn btn-primary"
+                                       class="btn btn-primary btn-sm"
                                        title="Imprimir recibo">
                                         <i class="bi bi-printer"></i> Recibo
                                     </a>
                                 }
+                                <a asp-controller="Cuotas"
+                                   asp-action="Edit"
+                                   asp-route-id="@cuota.CuotaId"
+                                   asp-route-solicitudId="@cuota.SolicitudId"
+                                   class="btn btn-warning btn-sm"
+                                   title="Editar cuota">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
                             </td>
-
                         </tr>
                     }
-
                 </tbody>
-
             </table>
+
         }
     </div>
+
     <!-- Resumen de Totales -->
     <div class="mt-3 d-flex justify-content-end">
         <div class="border rounded p-3 bg-light d-flex gap-4">
@@ -106,8 +166,8 @@
             <div><strong>Saldo:</strong> @totalSaldo.ToString("C")</div>
         </div>
     </div>
-
 </div>
+
 
 <!-- Modal Cobro -->
 <div class="modal fade" id="cobroModal" tabindex="-1" aria-labelledby="cobroModalLabel" aria-hidden="true">
@@ -190,7 +250,7 @@
 
                     <div class="mb-1">
                         <label for="CPM_Monto" class="form-label">Monto total a imputar</label>
-                        <input type="number"  class="form-control" id="CPM_Monto" name="monto" required />
+                        <input type="number" class="form-control" id="CPM_Monto" name="monto" required />
                     </div>
                     <div id="CPM_MontoHelp" class="form-text">
                         Sugerencia: saldo total pendiente (@totalSaldo.ToString("C")).
@@ -331,4 +391,3 @@
         })();
     </script>
 }
-

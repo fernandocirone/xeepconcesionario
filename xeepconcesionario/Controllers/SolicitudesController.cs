@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -295,6 +296,8 @@ namespace xeepconcesionario.Controllers
             {
                 EstadoId = 1,
                 FechaCarga = DateTime.Today,
+                CrearClienteNuevo = true,
+                ClienteNuevo = new Cliente(),
                 VendedorUserId = vendedorSel
             };
 
@@ -312,92 +315,71 @@ namespace xeepconcesionario.Controllers
             static DateTime AsUnspecified(DateTime dt) =>
                 DateTime.SpecifyKind(dt, DateTimeKind.Unspecified);
 
-            var user = await _userManager.GetUserAsync(User);
+            // fuerza “nuevo cliente” en esta pantalla
+            vm.CrearClienteNuevo = true;
+            ModelState.Remove(nameof(vm.ClienteId));  // <- clave
 
-            // Forzar vendedor si el logueado es vendedor
-            if (user?.TiposUsuario?.Any(tu => tu.TipoUsuarioId == 1) == true)
-                vm.VendedorUserId = user.Id;
-
-            // Usuario que carga
-            vm.UsuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Validaciones mínimas
             if (vm.PlanId == 0)
                 ModelState.AddModelError(nameof(vm.PlanId), "Debe seleccionar un Plan.");
 
-            if (!vm.CrearClienteNuevo && (!vm.ClienteId.HasValue || vm.ClienteId.Value <= 0))
-                ModelState.AddModelError(nameof(vm.ClienteId), "Debe seleccionar un cliente o cargar uno nuevo.");
-
+            await CargarCombosCreate(vm);
             if (!ModelState.IsValid)
-            {
-                await CargarCombosCreate(vm);
                 return View(vm);
-            }
 
             await using var tx = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1) Cliente (nuevo o existente)
-                int clienteId;
-                if (vm.CrearClienteNuevo)
-                {
-                    var cli = vm.ClienteNuevo ?? new Cliente();
-                    _context.Clientes.Add(cli);
-                    await _context.SaveChangesAsync();
-                    clienteId = cli.ClienteId;
-                }
-                else
-                {
-                    clienteId = vm.ClienteId!.Value;
-                }
+                // crear cliente nuevo
+                var cli = vm.ClienteNuevo ?? new Cliente();
+                _context.Clientes.Add(cli);
+                await _context.SaveChangesAsync();
+                var clienteId = cli.ClienteId;
 
-                // 2) Fechas normalizadas
+                // normalizar fechas
                 if (vm.FechaCarga.HasValue) vm.FechaCarga = AsUnspecified(vm.FechaCarga.Value);
                 if (vm.FechaSuscripcion.HasValue) vm.FechaSuscripcion = AsUnspecified(vm.FechaSuscripcion.Value);
 
-                // 3) Crear Solicitud
-                var solicitud = new Solicitud
-                {
-                    ContratoId = vm.ContratoId,
-                    VendedorUserId = vm.VendedorUserId,
-                    SupervisorUserId = vm.SupervisorUserId,
-                    JefeVentasUserId = vm.JefeVentasUserId,
-                    UsuarioId = vm.UsuarioId!,
-                    ClienteId = clienteId,
-                    PlanId = vm.PlanId,
-                    CondicionVentaId = vm.CondicionVentaId,
-                    TipoBajaId = vm.TipoBajaId,
-                    EstadoId = vm.EstadoId <= 0 ? 1 : vm.EstadoId,
-                    FechaCarga = vm.FechaCarga,
-                    FechaSuscripcion = vm.FechaSuscripcion,
-                    ValorSellado1 = vm.ValorSellado1,
-                    ValorSellado2 = vm.ValorSellado2,
-                    NumeroSolicitud = vm.NumeroSolicitud,
-                    ObservacionSolicitud = vm.ObservacionSolicitud
-                };
+                // plan + importe
+                var plan = await _context.Planes.AsNoTracking()
+                             .FirstOrDefaultAsync(p => p.PlanId == vm.PlanId)
+                           ?? throw new InvalidOperationException("No se encontró el Plan seleccionado.");
 
-                _context.Solicitudes.Add(solicitud);
-                await _context.SaveChangesAsync();
-
-                // 4) Importe de cuota
-                var auto = await _context.Planes.AsNoTracking()
-                    .FirstOrDefaultAsync(a => a.PlanId == vm.PlanId)
-                    ?? throw new InvalidOperationException("No se encontró el Plan seleccionado.");
-
-                decimal importe = vm.ImporteCuota ?? auto.AdelantoMensual;
+                decimal importe = vm.ImporteCuota ?? plan.AdelantoMensual;
                 if (importe <= 0) throw new InvalidOperationException("El importe de la cuota calculado es inválido (<= 0).");
 
-                // 5) Fecha base (día 10)
-                DateTime baseDate = vm.FechaPrimerVencimiento ?? vm.FechaSuscripcion ?? DateTime.Now;
-                DateTime fechaBase = baseDate.Day >= 10
+                // fecha base día 10
+                var baseDate = vm.FechaPrimerVencimiento ?? vm.FechaSuscripcion ?? DateTime.Now;
+                var fechaBase = baseDate.Day >= 10
                     ? new DateTime(baseDate.Year, baseDate.Month, 10).AddMonths(1)
                     : new DateTime(baseDate.Year, baseDate.Month, 10);
                 fechaBase = AsUnspecified(fechaBase);
 
-                // 6) Generar cuotas
-                int cantidad = vm.CantidadCuotas <= 0 ? 99 : vm.CantidadCuotas;
-                var cuotas = new List<Cuota>(capacity: cantidad);
+                // solicitud (sellados pueden ser null)
+                var solicitud = new Solicitud
+                {
+                    UsuarioId = vm.UsuarioId!,
+                    ClienteId = clienteId,
+                    PlanId = vm.PlanId,
+                    ContratoId = vm.ContratoId,
+                    FechaCarga = vm.FechaCarga,
+                    FechaSuscripcion = vm.FechaSuscripcion,
+                    ValorSellado1 = vm.ValorSellado1,
+                    ValorSellado2 = vm.ValorSellado2,
+                    EstadoId = vm.EstadoId <= 0 ? 1 : vm.EstadoId,
+                    NumeroSolicitud = vm.NumeroSolicitud,
+                    ObservacionSolicitud = vm.ObservacionSolicitud,
+                    VendedorUserId = vm.VendedorUserId,
+                    SupervisorUserId = vm.SupervisorUserId,
+                    JefeVentasUserId = vm.JefeVentasUserId,
+                    CondicionVentaId = vm.CondicionVentaId,
+                    TipoBajaId = vm.TipoBajaId
+                };
+                _context.Solicitudes.Add(solicitud);
+                await _context.SaveChangesAsync();
 
+                // cuotas (blindar sellados)
+                int cantidad = vm.CantidadCuotas <= 0 ? 99 : vm.CantidadCuotas;
+                var cuotas = new List<Cuota>(cantidad);
                 for (int n = 1; n <= cantidad; n++)
                 {
                     var venc = AsUnspecified(new DateTime(fechaBase.Year, fechaBase.Month, 10).AddMonths(n - 1));
@@ -415,7 +397,6 @@ namespace xeepconcesionario.Controllers
                         EstadoCuota = Cuota.Estado.Pendiente
                     });
                 }
-
                 _context.Cuotas.AddRange(cuotas);
                 await _context.SaveChangesAsync();
 
@@ -428,6 +409,7 @@ namespace xeepconcesionario.Controllers
                 throw;
             }
         }
+
 
         private async Task CargarCombosCreate(CreateSolicitudViewModel vm)
         {

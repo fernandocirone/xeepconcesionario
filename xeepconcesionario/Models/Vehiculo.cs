@@ -11,6 +11,8 @@ namespace xeepconcesionario.Models
         public int? Año { get; set; }
         public string? Color { get; set; }
 
+        public decimal? Valor { get; set; }
+
         [DataType(DataType.Date)]
         [Column(TypeName = "timestamp without time zone")]
         public DateTime FechaAlta { get; set; } = DateTime.Now;

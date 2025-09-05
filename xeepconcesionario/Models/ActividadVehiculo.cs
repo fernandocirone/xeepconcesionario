@@ -13,6 +13,8 @@ namespace xeepconcesionario.Models
         public int? TipoActividadVehiculoId { get; set; }
         public TipoActividadVehiculo? TipoActividadVehiculo { get; set; }
 
+        public decimal? Monto { get; set; }
+
         public int? SucursalId { get; set; }
         public Sucursal? Sucursal { get; set; }
 

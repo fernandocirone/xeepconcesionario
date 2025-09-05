@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using xeepconcesionario.Data;
@@ -11,9 +12,11 @@ using xeepconcesionario.Data;
 namespace xeepconcesionario.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250905002240_CambiosDBContext")]
+    partial class CambiosDBContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,6 +105,23 @@ namespace xeepconcesionario.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("Cobrador", b =>
+                {
+                    b.Property<int>("CobradorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CobradorId"));
+
+                    b.Property<string>("NombreCobrador")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("CobradorId");
+
+                    b.ToTable("Cobradores");
+                });
+
             modelBuilder.Entity("Cobro", b =>
                 {
                     b.Property<int>("CobroId")
@@ -109,6 +129,9 @@ namespace xeepconcesionario.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CobroId"));
+
+                    b.Property<int?>("CobradorId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("CuotaId")
                         .HasColumnType("integer");
@@ -130,6 +153,8 @@ namespace xeepconcesionario.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("CobroId");
+
+                    b.HasIndex("CobradorId");
 
                     b.HasIndex("CuotaId");
 
@@ -457,6 +482,30 @@ namespace xeepconcesionario.Migrations
                     b.ToTable("TiposBaja");
                 });
 
+            modelBuilder.Entity("ValorPlan", b =>
+                {
+                    b.Property<int>("ValorPlanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ValorPlanId"));
+
+                    b.Property<DateTime>("FechaValor")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("ValorPlanId");
+
+                    b.HasIndex("PlanId");
+
+                    b.ToTable("ValoresPlan");
+                });
+
             modelBuilder.Entity("xeepconcesionario.Models.ActividadSolicitud", b =>
                 {
                     b.Property<int>("ActividadSolicitudId")
@@ -502,9 +551,6 @@ namespace xeepconcesionario.Migrations
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<decimal?>("Monto")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("Observacion")
                         .HasColumnType("text");
@@ -819,9 +865,6 @@ namespace xeepconcesionario.Migrations
                     b.Property<string>("Patente")
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("Valor")
-                        .HasColumnType("numeric");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Patente")
@@ -876,6 +919,10 @@ namespace xeepconcesionario.Migrations
 
             modelBuilder.Entity("Cobro", b =>
                 {
+                    b.HasOne("Cobrador", "Cobrador")
+                        .WithMany("Cobros")
+                        .HasForeignKey("CobradorId");
+
                     b.HasOne("Cuota", "Cuota")
                         .WithMany("Cobros")
                         .HasForeignKey("CuotaId")
@@ -893,6 +940,8 @@ namespace xeepconcesionario.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Cobrador");
 
                     b.Navigation("Cuota");
 
@@ -980,6 +1029,17 @@ namespace xeepconcesionario.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ValorPlan", b =>
+                {
+                    b.HasOne("xeepconcesionario.Plan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("xeepconcesionario.Models.ActividadSolicitud", b =>
@@ -1139,6 +1199,11 @@ namespace xeepconcesionario.Migrations
             modelBuilder.Entity("Cliente", b =>
                 {
                     b.Navigation("Solicitudes");
+                });
+
+            modelBuilder.Entity("Cobrador", b =>
+                {
+                    b.Navigation("Cobros");
                 });
 
             modelBuilder.Entity("CondicionVenta", b =>

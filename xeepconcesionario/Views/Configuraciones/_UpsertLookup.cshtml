@@ -4,6 +4,7 @@
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="Tipo" />
+    <input type="hidden" asp-for="Color" id="ColorHidden" />
 
     <div class="mb-3">
         <label asp-for="Nombre" class="form-label">Nombre</label>
@@ -11,8 +12,86 @@
         <span asp-validation-for="Nombre" class="text-danger"></span>
     </div>
 
+    @if (Model.Tipo?.ToLowerInvariant() == "estado")
+    {
+        <div class="mb-3">
+            <label class="form-label">Color</label>
+            <div class="d-flex align-items-center gap-2">
+                <input type="color" id="ColorPicker" class="form-control form-control-color"
+                       style="width:3rem;height:2.1rem;padding:0;" />
+                <input type="text" id="ColorHex" class="form-control" placeholder="#RRGGBB" maxlength="7" />
+            </div>
+            <small class="text-muted">Ej.: #28A745, #DC3545, #FFC107</small>
+            <div class="mt-2">
+                <span id="ColorPreview" class="badge rounded-pill" style="background:#6c757d;">Vista previa</span>
+            </div>
+            <span asp-validation-for="Color" class="text-danger"></span>
+        </div>
+    }
+
+    @if (Model.Tipo?.ToLowerInvariant() == "sucursal")
+    {
+        <div class="mb-3">
+            <label asp-for="Direccion" class="form-label">Dirección</label>
+            <input asp-for="Direccion" class="form-control" placeholder="Dirección" autocomplete="street-address" />
+            <span asp-validation-for="Direccion" class="text-danger"></span>
+        </div>
+    }
+
     <div class="d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="submit" class="btn btn-primary">Guardar</button>
     </div>
 </form>
+
+<script>
+    // --- Lógica de COLOR solo cuando Tipo = "estado"
+    (function () {
+        const isEstado = '@(Model.Tipo?.ToLowerInvariant())' === 'estado';
+        if (!isEstado) return;
+
+        const hidden = document.getElementById('ColorHidden');
+        const picker = document.getElementById('ColorPicker');
+        const hex = document.getElementById('ColorHex');
+        const prev = document.getElementById('ColorPreview');
+
+        const isHex3 = v => /^#[0-9A-F]{3}$/i.test(v);
+        const isHex6 = v => /^#[0-9A-F]{6}$/i.test(v);
+
+        function expand3to6(v) {
+            return '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+        }
+
+        const def = (hidden.value && (isHex3(hidden.value) || isHex6(hidden.value)))
+            ? hidden.value
+            : '#6c757d';
+
+        // normalizar default a 6 dígitos
+        const def6 = isHex3(def) ? expand3to6(def.toUpperCase()) : def.toUpperCase();
+        picker.value = def6;
+        hex.value = def6;
+        prev.style.background = def6;
+
+        function setAll(val) {
+            if (!val) return;
+            let v = String(val).trim().toUpperCase();
+            if (!v.startsWith('#')) v = '#' + v;
+            if (isHex3(v)) v = expand3to6(v);
+            if (!isHex6(v)) return; // inválido => no aplico
+            hidden.value = picker.value = hex.value = v;
+            prev.style.background = v;
+        }
+
+        picker.addEventListener('input', e => setAll(e.target.value));
+
+        hex.addEventListener('input', e => {
+            let v = e.target.value.trim().toUpperCase();
+            if (!v.startsWith('#')) v = '#' + v;
+            if (isHex3(v)) v = expand3to6(v);
+            if (isHex6(v)) prev.style.background = v;
+        });
+
+        hex.addEventListener('blur', e => setAll(e.target.value));
+        document.getElementById('formUpsert').addEventListener('submit', () => setAll(hex.value));
+    })();
+</script>

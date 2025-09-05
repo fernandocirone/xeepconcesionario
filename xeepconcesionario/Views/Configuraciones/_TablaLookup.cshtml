@@ -1,28 +1,108 @@
 ﻿@model IEnumerable<xeepconcesionario.Models.Dto.LookupDto>
 
-<table class="table table-sm align-middle">
-    <thead>
-        <tr>
-            <th style="width:80px">Id</th>
-            <th>Nombre</th>
-            <th style="width:160px" class="text-end">Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Nombre</td>
-                <td class="text-end">
-                    <button class="btn btn-outline-primary btn-sm btn-edit" data-id="@item.Id" title="Editar @item.Nombre">
-                        <i class="bi bi-pencil-square"></i> Editar
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm btn-delete" data-id="@item.Id" title="Eliminar @item.Nombre">
-                        <i class="bi bi-trash"></i> Borrar
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+@functions {
+    // Contraste básico para texto (si alguna vez lo querés usar sobre el chip)
+    string GetTextColor(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex)) return "#FFFFFF";
+        var h = hex.Trim().TrimStart('#');
+        if (h.Length == 3) h = string.Concat(h.Select(c => $"{c}{c}")); // #RGB -> #RRGGBB
+        if (h.Length != 6) return "#FFFFFF";
+        int r = Convert.ToInt32(h.Substring(0, 2), 16);
+        int g = Convert.ToInt32(h.Substring(2, 2), 16);
+        int b = Convert.ToInt32(h.Substring(4, 2), 16);
+        // luminancia percibida
+        double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0;
+        return luminance > 0.55 ? "#111111" : "#FFFFFF";
+    }
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm align-middle table-hover mb-0">
+                <thead class="bg-light">
+                    <tr class="text-muted">
+                        <th style="width:90px">Id</th>
+                        <th>Nombre</th>
+                        @if (Model?.FirstOrDefault()?.Tipo == "estado")
+                        {
+                            <th style="width:160px">Color</th>
+                        }
+                        @if (Model?.FirstOrDefault()?.Tipo == "sucursal")
+                        {
+                            <th style="width:160px">Direccion</th>
+                        }
+                        <th style="width:180px" class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    @foreach (var item in Model)
+                    {
+                        var color = string.IsNullOrWhiteSpace(item.Color) ? "#6c757d" : item.Color;
+                        <tr>
+                            <td class="text-muted">@item.Id</td>
+                            <td class="fw-semibold">@item.Nombre</td>
+
+                            @if (item.Tipo == "estado")
+                            {
+                                <td>
+                                    <span class="color-chip" title="@color"
+                                          style="background:@color;border-color:@color;"></span>
+                                    <code class="text-muted ms-2">@color</code>
+                                </td>
+                            }
+                            @if (item.Tipo == "sucursal")
+                            {
+                                   <td class="fw-semibold">@item.Direccion</td>
+                            }
+
+                            <td class="text-end">
+                                <button class="btn btn-outline-primary btn-sm btn-edit" data-id="@item.Id" title="Editar @item.Nombre">
+                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm btn-delete" data-id="@item.Id" title="Eliminar @item.Nombre">
+                                    <i class="bi bi-trash me-1"></i> Borrar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Chip de color: redondeado, borde tenue y sombrita */
+    .color-chip {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 1px solid rgba(0,0,0,.12);
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.06) inset, 0 0 0 1px rgba(255,255,255,.5);
+        vertical-align: middle;
+    }
+
+    /* Tabla más liviana visualmente */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.03);
+    }
+
+    .card {
+        border-radius: .75rem;
+    }
+
+    .card-body {
+        padding: 1rem 1.25rem;
+    }
+
+    thead.bg-light th {
+        border-bottom: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    .table-group-divider {
+        border-top: 1px solid rgba(0,0,0,.06);
+    }
+</style>

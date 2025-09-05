@@ -10,9 +10,6 @@ public class Cobro
     public int SolicitudId { get; set; }
     public Solicitud Solicitud { get; set; }
 
-    public int? CobradorId { get; set; }
-    public Cobrador Cobrador { get; set; }
-
     public string UsuarioId { get; set; }  
     
     public ApplicationUser? Usuario { get; set; }

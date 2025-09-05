@@ -10,7 +10,7 @@ namespace xeepconcesionario.Models
 
         // --- Cliente ---
         public int? ClienteId { get; set; }                       // si viene, usa existente
-        public bool CrearClienteNuevo { get; set; } = false;      // si true, ignora ClienteId
+        public bool CrearClienteNuevo { get; set; } = true;      // si true, ignora ClienteId
         public Cliente ClienteNuevo { get; set; } = new();        // se postea con ClienteNuevo.Prop
 
         // --- Usuarios (nuevo: Id string de AspNetUsers) ---
