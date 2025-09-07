@@ -21,27 +21,6 @@
 
     <div class="row g-3">
 
-        <!-- Contrato -->
-        <div class="col-md-6">
-            <label class="form-label">Negociación</label>
-            <div class="input-group">
-                <select asp-for="ContratoId"
-                        class="form-select form-select-sm"
-                        asp-items="ViewBag.ContratoId"
-                        id="ContratoId"
-                        style="max-width: 200px;">
-                </select>
-                <button type="button"
-                        class="btn btn-outline-primary btn-sm"
-                        id="abrirModalContrato"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalContrato">
-                    <i class="bi bi-plus-circle"></i> Nuevo
-                </button>
-            </div>
-            <span asp-validation-for="ContratoId" class="text-danger"></span>
-        </div>
-
         <!-- Numero Solicitud -->
         <div class="col-md-6">
             <label asp-for="NumeroSolicitud" class="form-label">Numero Solicitud</label>

@@ -95,14 +95,21 @@
                                     }
                                 </td>
                                 <td>
-                                    <a asp-area="Identity"
-                                       asp-page="/Account/EditUserModel"
-                                       asp-route-id="@u.Id"
-                                       class="btn btn-sm btn-primary">
-                                        Editar
-                                    </a>
-
+                                    <div class="d-flex gap-2">
+                                        <a asp-area="Identity"
+                                           asp-page="/Account/EditUserModel"
+                                           asp-route-id="@u.Id"
+                                           class="btn btn-sm btn-primary">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm btn-warning edit-permissions"
+                                                data-userid="@u.Id">
+                                            <i class="bi bi-key"></i> Permisos
+                                        </button>
+                                    </div>
                                 </td>
+
                             </tr>
                         }
                     }
@@ -119,6 +126,29 @@
     </div>
 </div>
 
+<div class="modal fade" id="permissionsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Permisos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="permissionsModalBody">
+                <!-- contenido cargado vía AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).on("click", ".edit-permissions", function () {
+            const userId = $(this).data("userid");
+            $("#permissionsModalBody").load(`/Identity/Account/Register?handler=EditPermissions&id=${userId}`, function () {
+                $("#permissionsModal").modal("show");
+            });
+        });
+    </script>
 }
+

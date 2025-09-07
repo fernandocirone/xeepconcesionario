@@ -73,26 +73,43 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         @if (SignInManager.IsSignedIn(User))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Solicitudes" asp-action="Index">📄 Solicitudes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Planes" asp-action="Index">🚘 Planes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cobros" asp-action="Index">💵 Cobros</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Cuotas" asp-action="Index">🧾 Cuotas</a>
-                            </li>
+                            <auth-link policy="Solicitudes.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Solicitudes" asp-action="Index">📄 Solicitudes</a>
+                                </li>
+                            </auth-link>
 
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">👤 Usuarios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Configuraciones" asp-action="Index">⚙️ Configuraciones</a>
-                            </li>
+                            <auth-link policy="Vehiculos.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Vehiculos" asp-action="Index">🚘 Vehículos</a>
+                                </li>
+                            </auth-link>
+
+                            <auth-link policy="Cobros.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Cobros" asp-action="Index">💵 Cobros</a>
+                                </li>
+                            </auth-link>
+
+                            <auth-link policy="Cuotas.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Cuotas" asp-action="Index">🧾 Cuotas</a>
+                                </li>
+                            </auth-link>
+
+                            <auth-link policy="Usuarios.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">👤 Usuarios</a>
+                                </li>
+                            </auth-link>
+
+                            <auth-link policy="Configuraciones.Ver">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Configuraciones" asp-action="Index">⚙️ Configuraciones</a>
+                                </li>
+                            </auth-link>
                         }
+
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

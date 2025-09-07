@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
@@ -25,7 +26,7 @@ using xeepconcesionario.Models;
 
 namespace xeepconcesionario.Areas.Identity.Pages.Account
 {
-    [AllowAnonymous]
+    [Authorize(Policy = "Usuarios.Crear")]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -192,6 +193,67 @@ namespace xeepconcesionario.Areas.Identity.Pages.Account
                 .ToListAsync();
 
         }
+
+        private readonly Dictionary<string, string[]> _permisosPorModulo = new()
+        {
+            ["Clientes"] = new[] { "Clientes.Ver", "Clientes.Crear", "Clientes.Editar", "Clientes.Borrar" },
+            ["Vehiculos"] = new[] { "Vehiculos.Ver", "Vehiculos.Crear", "Vehiculos.Editar", "Vehiculos.Borrar" },
+            ["Solicitudes"] = new[] { "Solicitudes.Ver", "Solicitudes.Crear", "Solicitudes.Editar", "Solicitudes.Borrar" },
+            ["Cobros"] = new[] { "Cobros.Ver", "Cobros.Crear", "Cobros.Editar", "Cobros.Borrar" },
+            ["Cuotas"] = new[] { "Cuotas.Ver", "Cuotas.Crear", "Cuotas.Editar", "Cuotas.Borrar" },
+            ["Planes"] = new[] { "Planes.Ver", "Planes.Crear", "Planes.Editar", "Planes.Borrar" },
+            ["Usuarios"] = new[] { "Usuarios.Crear" },
+            ["Configuraciones"] = new[] { "Configuraciones.Ver", "Configuraciones.Crear", "Configuraciones.Editar", "Configuraciones.Borrar" },
+            ["ActividadesVehiculo"] = new[] { "ActividadesVehiculo.Ver", "ActividadesVehiculo.Crear", "ActividadesVehiculo.Editar", "ActividadesVehiculo.Borrar" }
+        };
+
+        public async Task<IActionResult> OnGetEditPermissionsAsync(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            var vm = new UserPermissionViewModel
+            {
+                UserId = user.Id,
+                Email = user.Email!,
+                Grupos = _permisosPorModulo.Select(grupo => new PermissionGroup
+                {
+                    Nombre = grupo.Key,
+                    Permisos = grupo.Value.Select(p => new PermissionItem
+                    {
+                        Nombre = p,
+                        Asignado = claims.Any(c => c.Type == "Permiso" && c.Value == p)
+                    }).ToList()
+                }).ToList()
+            };
+
+            return Partial("_EditPermissions", vm);
+        }
+
+
+        public async Task<IActionResult> OnPostEditPermissionsAsync(UserPermissionViewModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null) return NotFound();
+
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            foreach (var c in claims.Where(c => c.Type == "Permiso"))
+                await _userManager.RemoveClaimAsync(user, c);
+
+            foreach (var grupo in model.Grupos)
+            {
+                foreach (var permiso in grupo.Permisos.Where(p => p.Asignado))
+                {
+                    await _userManager.AddClaimAsync(user, new Claim("Permiso", permiso.Nombre));
+                }
+            }
+
+            return RedirectToPage();
+        }
+
 
         private ApplicationUser CreateUser()
         {

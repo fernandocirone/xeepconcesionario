@@ -73,24 +73,23 @@ namespace xeepconcesionario.Controllers
 
 
 
-        // GET: Clientes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cliente = await _context.Clientes
                 .Include(c => c.Localidad)
-                .FirstOrDefaultAsync(m => m.ClienteId == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+                .Include(c => c.Solicitudes)
+                    .ThenInclude(s => s.Plan)
+                .Include(c => c.Solicitudes)
+                    .ThenInclude(s => s.Estado)
+                .FirstOrDefaultAsync(c => c.ClienteId == id);
+
+            if (cliente == null) return NotFound();
 
             return View(cliente);
         }
+
 
         // GET: Clientes/Create
         public IActionResult Create()

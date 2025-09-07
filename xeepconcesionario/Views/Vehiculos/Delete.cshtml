@@ -1,0 +1,65 @@
+﻿@model xeepconcesionario.Models.Vehiculo
+
+@{
+    ViewData["Title"] = "Eliminar Vehículo";
+}
+
+<div class="container mt-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-danger m-0">
+            <i class="bi bi-trash-fill"></i> Eliminar Vehículo
+        </h2>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left-circle"></i> Volver a la lista
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+            <p class="text-muted">
+                ¿Estás seguro de que deseas eliminar este vehículo?
+                Esta acción <strong>no se puede deshacer</strong>.
+            </p>
+
+            <dl class="row mb-4">
+                <dt class="col-sm-3">Patente</dt>
+                <dd class="col-sm-9">@Model.Patente</dd>
+
+                <dt class="col-sm-3">Modelo</dt>
+                <dd class="col-sm-9">@Model.Modelo</dd>
+
+                <dt class="col-sm-3">Año</dt>
+                <dd class="col-sm-9">@Model.Año</dd>
+
+                <dt class="col-sm-3">Color</dt>
+                <dd class="col-sm-9">@Model.Color</dd>
+
+                <dt class="col-sm-3">Valor</dt>
+                <dd class="col-sm-9">@Model.Valor?.ToString("C")</dd>
+
+                <dt class="col-sm-3">Fecha Alta</dt>
+                <dd class="col-sm-9">
+                    @Model.FechaAlta.ToString("dd/MM/yyyy")
+                </dd>
+
+                <dt class="col-sm-3">Observación</dt>
+                <dd class="col-sm-9">@Model.Observacion</dd>
+            </dl>
+
+            <!-- Formulario de confirmación -->
+            <form asp-action="Delete" method="post" class="d-flex justify-content-end gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Confirmar Eliminación
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

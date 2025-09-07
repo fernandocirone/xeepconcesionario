@@ -26,10 +26,8 @@ namespace xeepconcesionario.Models
         [DataType(DataType.MultilineText)]
         public string? Observacion { get; set; }
 
-        // Usuario que registró la actividad
-        [Required]
-        public string UsuarioId { get; set; } = null!;
-        public ApplicationUser Usuario { get; set; } = null!;
+        public string? UsuarioId { get; set; } = null!;
+        public ApplicationUser? Usuario { get; set; } = null!;
 
     }
 }

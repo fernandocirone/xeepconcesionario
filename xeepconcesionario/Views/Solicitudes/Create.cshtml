@@ -3,32 +3,17 @@
 @{
     ViewData["Title"] = "Nueva Solicitud";
 }
-
 <form asp-action="Create" method="post" id="formSolicitud">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
     <div class="row g-3">
-        <!-- Contrato -->
-        <div class="col-md-6">
-            <label class="form-label">Negociación</label>
-            <div class="input-group">
-                <select asp-for="ContratoId"
-                        class="form-select form-select-sm"
-                        asp-items="ViewBag.ContratoId"
-                        id="ContratoId">
-                </select>
-                <button type="button"
-                        class="btn btn-outline-primary btn-sm"
-                        id="abrirModalContrato">
-                    <i class="bi bi-plus-circle"></i> Nuevo
-                </button>
-            </div>
-        </div>
 
-        <!-- Numero Solicitud --></>
+        <input type="hidden" asp-for="ClienteId" id="ClienteIdHidden" />
+
+        <!-- Número Solicitud -->
         <div class="col-md-6">
-            <label asp-for="NumeroSolicitud" class="form-label">Numero Solicitud</label>
+            <label asp-for="NumeroSolicitud" class="form-label">Número Solicitud</label>
             <input asp-for="NumeroSolicitud" class="form-control" id="NumeroSolicitud" />
             <span asp-validation-for="NumeroSolicitud" class="text-danger"></span>
         </div>
@@ -67,178 +52,172 @@
 
         <!-- Usuario (quien carga) -->
         <input type="hidden" asp-for="UsuarioId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
+    </div>
 
-        <div class="col-12 border rounded p-3 bg-light">
-            <label style="font-weight: bold">DATOS CLIENTE</label>
-        </div>
+    <!-- Datos Cliente -->
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h5 class="fw-bold">DATOS CLIENTE</h5>
 
-        <!-- Cliente nuevo -->
-        <div class="col-12 border rounded p-3 bg-light" id="secCliNuevo">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Dni" class="form-label">DNI</label>
-                    <input asp-for="ClienteNuevo.Dni" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.ApellidoYNombre" class="form-label">Apllido y Nombre</label>
-                    <input asp-for="ClienteNuevo.ApellidoYNombre" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.TelefonoFijo" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.TelefonoFijo" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.TelefonoCelular" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.TelefonoCelular" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Mail" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Mail" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.FechaNacimiento" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.FechaNacimiento" type="date" class="form-control" />
-                </div>
-                <div class="col-md-12">
-                    <label asp-for="ClienteNuevo.Direccion" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Direccion" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Nacionalidad" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Nacionalidad" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.LocalidadId" class="form-label"></label>
-                    <select asp-for="ClienteNuevo.LocalidadId" class="form-select" asp-items="ViewBag.LocalidadId"></select>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Barrio" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Barrio" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.TipoVivienda" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.TipoVivienda" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Sexo" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Sexo" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.EstadoCivil" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.EstadoCivil" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Ocupacion" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Ocupacion" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Empresa" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Empresa" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.DomicilioLaboral" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.DomicilioLaboral" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.Cargo" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.Cargo" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.IngresosMensuales" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.IngresosMensuales" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.TipoOcupacion" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.TipoOcupacion" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="ClienteNuevo.RazonSocial" class="form-label"></label>
-                    <input asp-for="ClienteNuevo.RazonSocial" class="form-control" />
-                </div>
-                <div class="col-md-6 mt-4">
-                    <div class="form-check">
-                        <input type="checkbox"
-                               name="ClienteNuevo.TieneTarjetaCredito"
-                               value="true"
-                        @(Model.ClienteNuevo.TieneTarjetaCredito == true ? "checked" : "") />
-                        <label class="form-check-label">Tiene tarjeta de crédito</label>
-                    </div>
-
-
+        <div class="row g-3 mt-1" id="secCliNuevo">
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Dni" class="form-label">DNI</label>
+                <input asp-for="ClienteNuevo.Dni" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.ApellidoYNombre" class="form-label">Apellido y Nombre</label>
+                <input asp-for="ClienteNuevo.ApellidoYNombre" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.TelefonoFijo" class="form-label"></label>
+                <input asp-for="ClienteNuevo.TelefonoFijo" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.TelefonoCelular" class="form-label"></label>
+                <input asp-for="ClienteNuevo.TelefonoCelular" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Mail" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Mail" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.FechaNacimiento" class="form-label"></label>
+                <input asp-for="ClienteNuevo.FechaNacimiento" type="date" class="form-control" />
+            </div>
+            <div class="col-md-12">
+                <label asp-for="ClienteNuevo.Direccion" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Direccion" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Nacionalidad" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Nacionalidad" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.LocalidadId" class="form-label"></label>
+                <select asp-for="ClienteNuevo.LocalidadId" class="form-select" asp-items="ViewBag.LocalidadId"></select>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Barrio" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Barrio" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.TipoVivienda" class="form-label"></label>
+                <input asp-for="ClienteNuevo.TipoVivienda" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Sexo" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Sexo" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.EstadoCivil" class="form-label"></label>
+                <input asp-for="ClienteNuevo.EstadoCivil" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Ocupacion" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Ocupacion" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Empresa" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Empresa" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.DomicilioLaboral" class="form-label"></label>
+                <input asp-for="ClienteNuevo.DomicilioLaboral" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.Cargo" class="form-label"></label>
+                <input asp-for="ClienteNuevo.Cargo" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.IngresosMensuales" class="form-label"></label>
+                <input asp-for="ClienteNuevo.IngresosMensuales" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.TipoOcupacion" class="form-label"></label>
+                <input asp-for="ClienteNuevo.TipoOcupacion" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ClienteNuevo.RazonSocial" class="form-label"></label>
+                <input asp-for="ClienteNuevo.RazonSocial" class="form-control" />
+            </div>
+            <div class="col-md-6 mt-4">
+                <div class="form-check">
+                    <input type="checkbox"
+                           name="ClienteNuevo.TieneTarjetaCredito"
+                           value="true"
+                    @(Model.ClienteNuevo.TieneTarjetaCredito == true ? "checked" : "") />
+                    <label class="form-check-label">Tiene tarjeta de crédito</label>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-12 border rounded p-3 bg-light">
-            <label style="font-weight: bold">DATOS PLAN</label>
-        </div>
+    <!-- Datos Plan -->
+    <div class="mt-4 p-3 border rounded bg-light">
+        <h5 class="fw-bold">DATOS PLAN</h5>
 
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <label for="codigoAuto" class="form-label">Buscar por código</label>
+                <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="PlanId" class="form-label">Plan</label>
+                <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
+                <span asp-validation-for="PlanId" class="text-danger"></span>
+            </div>
 
-        <!-- Búsqueda por código -->
-        <div class="col-md-6">
-            <label for="codigoAuto" class="form-label">Buscar por código</label>
-            <input type="text" id="codigoAuto" class="form-control" placeholder="Ej: C60" />
-        </div>
+            <div class="col-md-6">
+                <label class="form-label">Condición de venta</label>
+                <select asp-for="CondicionVentaId" class="form-select" asp-items="ViewBag.CondicionVentaId"></select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Tipo de baja</label>
+                <select asp-for="TipoBajaId" class="form-select" asp-items="ViewBag.TipoBajaId"></select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                <select class="form-select" disabled>
+                    <option value="1" selected>Nuevo</option>
+                </select>
+                <input type="hidden" asp-for="EstadoId" value="1" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FechaCarga" class="form-label">Fecha de carga</label>
+                <input asp-for="FechaCarga" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="FechaSuscripcion" class="form-label">Fecha suscripción</label>
+                <input asp-for="FechaSuscripcion" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ValorSellado1" class="form-label">Valor Sellado</label>
+                <input asp-for="ValorSellado1" class="form-control" id="ValorSellado1" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ValorSellado2" class="form-label">Valor Sellado 2</label>
+                <input asp-for="ValorSellado2" class="form-control" id="ValorSellado2" />
+            </div>
 
-        <!-- Plan -->
-        <div class="col-md-6">
-            <label asp-for="PlanId" class="form-label">Plan</label>
-            <select asp-for="PlanId" class="form-select" asp-items="ViewBag.PlanId" id="PlanId"></select>
-            <span asp-validation-for="PlanId" class="text-danger"></span>
-        </div>
-
-        <!-- Condición / Tipo Baja / Estado / Fechas / Sellados -->
-        <div class="col-md-6">
-            <label class="form-label">Condición de venta</label>
-            <select asp-for="CondicionVentaId" class="form-select" asp-items="ViewBag.CondicionVentaId"></select>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Tipo de baja</label>
-            <select asp-for="TipoBajaId" class="form-select" asp-items="ViewBag.TipoBajaId"></select>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Estado</label>
-            <select class="form-select" disabled>
-                <option value="1" selected>Nuevo</option>
-            </select>
-            <input type="hidden" asp-for="EstadoId" value="1" />
-        </div>
-        <div class="col-md-6">
-            <label asp-for="FechaCarga" class="form-label">Fecha de carga</label>
-            <input asp-for="FechaCarga" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" readonly />
-        </div>
-        <div class="col-md-6">
-            <label asp-for="FechaSuscripcion" class="form-label">Fecha suscripción</label>
-            <input asp-for="FechaSuscripcion" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
-        </div>
-        <div class="col-md-6">
-            <label asp-for="ValorSellado1" class="form-label">Valor Sellado</label>
-            <input asp-for="ValorSellado1" class="form-control" id="ValorSellado1" />
-        </div>
-        <div class="col-md-6">
-            <label asp-for="ValorSellado2" class="form-label">Valor Sellado 2</label>
-            <input asp-for="ValorSellado2" class="form-control" id="ValorSellado2" />
-        </div>
-
-        <!-- Parámetros de cuotas -->
-        <div class="col-md-4">
-            <label asp-for="CantidadCuotas" class="form-label">Cantidad cuotas</label>
-            <input asp-for="CantidadCuotas" class="form-control" />
-        </div>
-        <div class="col-md-4">
-            <label asp-for="FechaPrimerVencimiento" class="form-label">1er vencimiento</label>
-            <input asp-for="FechaPrimerVencimiento" type="date" class="form-control" />
-        </div>
-        <div class="col-md-4">
-            <label asp-for="ImporteCuota" class="form-label">Importe cuota</label>
-            <input asp-for="ImporteCuota" class="form-control" />
-        </div>
-        <div class="col-md-12">
-            <label asp-for="ObservacionSolicitud" class="form-label">Observacion</label>
-            <input asp-for="ObservacionSolicitud" class="form-control" />
+            <div class="col-md-4">
+                <label asp-for="CantidadCuotas" class="form-label">Cantidad cuotas</label>
+                <input asp-for="CantidadCuotas" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="FechaPrimerVencimiento" class="form-label">1er vencimiento</label>
+                <input asp-for="FechaPrimerVencimiento" type="date" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="ImporteCuota" class="form-label">Importe cuota</label>
+                <input asp-for="ImporteCuota" class="form-control" id="ImporteCuota" />
+            </div>
+            <div class="col-md-12">
+                <label asp-for="ObservacionSolicitud" class="form-label">Observación</label>
+                <input asp-for="ObservacionSolicitud" class="form-control" />
+            </div>
         </div>
     </div>
 
+    <!-- Botón -->
     <div class="mt-4 d-flex justify-content-end">
         <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Guardar Solicitud
@@ -246,46 +225,7 @@
     </div>
 </form>
 
-<!-- Modal: Crear Contrato -->
-<div class="modal fade" id="modalContrato" tabindex="-1" aria-labelledby="modalContratoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="modalContratoLabel" class="modal-title">Nuevo Contrato</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
 
-            <div class="modal-body">
-                <form id="formContrato">
-                    @Html.AntiForgeryToken()
-
-                    <div class="mb-3">
-                        <label for="NombreContrato" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="NombreContrato" maxlength="100" required />
-                        <div class="form-text">Ej: “Plan 60 cuotas”.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="DescripcionContrato" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="DescripcionContrato" rows="3"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="PlazoMeses" class="form-label">Plazo (meses)</label>
-                        <input type="number" class="form-control" id="PlazoMeses" min="1" max="240" />
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnGuardarContrato">
-                    <i class="bi bi-save"></i> Guardar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal: Cliente ya existente con solicitudes -->
 <div class="modal fade" id="modalClienteExiste" tabindex="-1" aria-labelledby="modalClienteExisteLabel" aria-hidden="true">
@@ -345,7 +285,7 @@
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script>
-        // ====== MODAL CLIENTE EXISTE: instancia única ======
+        // ====== MODAL CLIENTE EXISTE ======
         const modalClienteEl = document.getElementById('modalClienteExiste');
         const modalCliente = new bootstrap.Modal(modalClienteEl, {
             backdrop: true,
@@ -353,23 +293,17 @@
             focus: true
         });
 
-        // Flags para evitar loop
-        let lastQueriedDni = "";        // último DNI consultado al server
-        let lastModalDni = "";          // último DNI para el que se mostró modal
-        let suppressUntilChange = false; // no consultar hasta que cambie el valor
+        let lastQueriedDni = "";
+        let lastModalDni = "";
+        let suppressUntilChange = false;
 
-        // Al cerrar modal: NO devolver foco automáticamente (evita blur/input)
-        modalClienteEl.addEventListener('hidden.bs.modal', () => {
-            // Si preferís devolver foco, mantené esta línea pero queda cubierto por la bandera:
-            // document.getElementById('ClienteNuevo_Dni')?.focus();
-        });
-
-        // Botón "Continuar de todos modos": cerrar modal
+        // Botón "Continuar de todos modos": solo cerrar modal
         document
             .querySelector('#modalClienteExiste .btn.btn-primary[data-bs-dismiss="modal"]')
-            ?.addEventListener('click', () => modalCliente.hide());
+            ?.addEventListener('click', () => {
+                modalCliente.hide();
+            });
 
-        // ====== Hook DNI: busca cliente y muestra modal si corresponde ======
         (function () {
             const dniInput = document.getElementById('ClienteNuevo_Dni');
             if (!dniInput) return;
@@ -380,22 +314,68 @@
                 return (v || "").trim().replaceAll(".", "").replaceAll("-", "");
             }
 
+            function rellenarCamposCliente(cliente) {
+                if (!cliente) return;
+
+                // Guardar ClienteId en hidden
+                let inputClienteId = document.getElementById('ClienteIdHidden');
+                if (!inputClienteId) {
+                    inputClienteId = document.createElement('input');
+                    inputClienteId.type = 'hidden';
+                    inputClienteId.id = 'ClienteIdHidden';
+                    inputClienteId.name = 'ClienteId';
+                    document.getElementById('formSolicitud').appendChild(inputClienteId);
+                }
+                inputClienteId.value = cliente.clienteId;
+
+                // Rellenar campos de cliente
+                document.getElementById('ClienteNuevo_ApellidoYNombre').value = cliente.apellidoYNombre ?? "";
+                document.getElementById('ClienteNuevo_TelefonoFijo').value = cliente.telefonoFijo ?? "";
+                document.getElementById('ClienteNuevo_TelefonoCelular').value = cliente.telefonoCelular ?? "";
+                document.getElementById('ClienteNuevo_Mail').value = cliente.mail ?? "";
+                document.getElementById('ClienteNuevo_Direccion').value = cliente.direccion ?? "";
+                document.getElementById('ClienteNuevo_Nacionalidad').value = cliente.nacionalidad ?? "";
+                document.getElementById('ClienteNuevo_Barrio').value = cliente.barrio ?? "";
+                document.getElementById('ClienteNuevo_TipoVivienda').value = cliente.tipoVivienda ?? "";
+                document.getElementById('ClienteNuevo_Sexo').value = cliente.sexo ?? "";
+                document.getElementById('ClienteNuevo_EstadoCivil').value = cliente.estadoCivil ?? "";
+                document.getElementById('ClienteNuevo_Ocupacion').value = cliente.ocupacion ?? "";
+                document.getElementById('ClienteNuevo_Empresa').value = cliente.empresa ?? "";
+                document.getElementById('ClienteNuevo_DomicilioLaboral').value = cliente.domicilioLaboral ?? "";
+                document.getElementById('ClienteNuevo_Cargo').value = cliente.cargo ?? "";
+                document.getElementById('ClienteNuevo_IngresosMensuales').value = cliente.ingresosMensuales ?? "";
+                document.getElementById('ClienteNuevo_TipoOcupacion').value = cliente.tipoOcupacion ?? "";
+                document.getElementById('ClienteNuevo_RazonSocial').value = cliente.razonSocial ?? "";
+
+                // Fecha nacimiento (si viene con valor)
+                if (cliente.fechaNacimiento) {
+                    const fecha = new Date(cliente.fechaNacimiento);
+                    document.getElementById('ClienteNuevo_FechaNacimiento').value = fecha.toISOString().split("T")[0];
+                }
+
+                // Localidad
+                if (cliente.localidadId) {
+                    document.getElementById('ClienteNuevo_LocalidadId').value = cliente.localidadId;
+                }
+
+                // TieneTarjetaCredito
+                const chk = document.querySelector("input[name='ClienteNuevo.TieneTarjetaCredito']");
+                if (chk) chk.checked = cliente.tieneTarjetaCredito === true;
+            }
+
             function buscarClientePorDni(dniRaw) {
                 const dni = normalizarDni(dniRaw);
                 if (!dni) return;
 
-                // Si estamos suprimidos hasta que cambie, o ya consultamos lo mismo, salir
                 if (suppressUntilChange) return;
                 if (dni === lastQueriedDni) return;
 
                 lastQueriedDni = dni;
 
-                fetch('@Url.Action("CheckClientePorDni", "Solicitudes")' + '?dni=' + encodeURIComponent(dni), { method: 'GET' })
+                fetch('@Url.Action("CheckClientePorDni", "Solicitudes")' + '?dni=' + encodeURIComponent(dni))
                     .then(r => r.ok ? r.json() : Promise.reject(r))
                     .then(data => {
                         if (!data || !data.exists) return;
-
-                        // Si ya mostramos modal para este mismo DNI, no re-abrir
                         if (dni === lastModalDni) return;
 
                         // Rellenar modal
@@ -415,7 +395,7 @@
                                 const tr = document.createElement('tr');
 
                                 const tdNum = document.createElement('td');
-                                tdNum.textContent = s.numeroSolicitud ?? s.SolicitudId ?? '—';
+                                tdNum.textContent = s.numeroSolicitud ?? s.solicitudId ?? '—';
                                 tr.appendChild(tdNum);
 
                                 const tdEstado = document.createElement('td');
@@ -440,11 +420,14 @@
                             }
                         }
 
-                        // Botón "Ver todas"
+                        // 👉 Rellenar formulario con los datos del cliente
+                        rellenarCamposCliente(data.cliente);
+
+                        // 👉 Botón "Ver todas"
                         const btnLista = document.getElementById('btnVerListaCliente');
                         if (btnLista) btnLista.href = '/Solicitudes?clienteId=' + encodeURIComponent(data.clienteId);
 
-                        // Mostrar modal y activar supresión hasta que el DNI cambie
+                        // Mostrar modal
                         lastModalDni = dni;
                         suppressUntilChange = true;
                         modalCliente.show();
@@ -452,12 +435,10 @@
                     .catch(err => console.error('Error CheckClientePorDni:', err));
             }
 
-            // Solo por INPUT con debounce (quitamos BLUR para evitar loop)
             dniInput.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
 
-                // Si el valor cambió respecto al último que disparó modal, re-habilitar consulta
-                const valNorm = (dniInput.value || "").trim().replaceAll(".", "").replaceAll("-", "");
+                const valNorm = normalizarDni(dniInput.value);
                 if (valNorm !== lastModalDni) {
                     suppressUntilChange = false;
                 }
@@ -467,77 +448,21 @@
         })();
     </script>
 
+
     <script>
         // Buscar auto por prefijo de código
         document.getElementById('codigoAuto').addEventListener('input', function () {
             const codigo = this.value.toLowerCase();
-            const sel = document.getElementById('PlanId');
-            for (const opt of sel.options) {
+            const $sel = $('#PlanId');
+            for (const opt of $sel[0].options) {
                 if (opt.text.toLowerCase().startsWith(codigo)) {
-                    sel.value = opt.value;
-                    sel.dispatchEvent(new Event('change'));
+                    $sel.val(opt.value).trigger('change');
                     break;
                 }
             }
         });
 
-        // Abrir modal de Contrato
-        document.getElementById('abrirModalContrato')
-            .addEventListener('click', () => {
-                const modal = new bootstrap.Modal(document.getElementById('modalContrato'));
-                modal.show();
-            });
-
-        // Guardar contrato por AJAX
-        document.getElementById('btnGuardarContrato')
-            .addEventListener('click', function () {
-                const nombre = document.getElementById('NombreContrato').value.trim();
-                const desc = document.getElementById('DescripcionContrato').value.trim();
-                const plazo = document.getElementById('PlazoMeses').value;
-
-                if (!nombre) {
-                    alert('El nombre del contrato es obligatorio.');
-                    document.getElementById('NombreContrato').focus();
-                    return;
-                }
-
-                const token = document.querySelector('#formContrato input[name="__RequestVerificationToken"]')?.value || '';
-
-                fetch('@Url.Action("CrearDesdeSolicitud", "Contratos")', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'RequestVerificationToken': token
-                    },
-                    body: new URLSearchParams({
-                        NombreContrato: nombre,
-                        DescripcionContrato: desc,
-                        PlazoMeses: plazo
-                    })
-                })
-                    .then(r => r.ok ? r.json() : Promise.reject(r))
-                    .then(resp => {
-                        if (!resp?.success) {
-                            alert('No se pudo guardar el contrato: ' + (resp?.message ?? 'Error desconocido'));
-                            return;
-                        }
-
-                        // Agregar al combo y seleccionar
-                        const sel = document.getElementById('ContratoId');
-                        const opt = new Option(resp.nombre ?? ('Contrato #' + resp.id), resp.id, true, true);
-                        sel.add(opt, undefined);
-
-                        // Cerrar modal y limpiar
-                        bootstrap.Modal.getInstance(document.getElementById('modalContrato')).hide();
-                        document.getElementById('formContrato').reset();
-                    })
-                    .catch(err => {
-                        alert('Error al guardar el contrato.');
-                        console.error(err);
-                    });
-            });
-
-        // --- Precarga de sellados por Plan
+        // --- Precarga de sellados por Plan ---
         (function () {
             const urlBase = '/Planes/sellados/';
 
@@ -560,7 +485,7 @@
             function cargarSellados(PlanId) {
                 $.getJSON(urlBase + PlanId)
                     .done(function (data) {
-                        setSellados(data?.sellado1, data?.sellado2);
+                        setSellados(data?.sellado1, data?.sellado2, data?.importeCuota);
                     })
                     .fail(function (xhr) {
                         console.error('Error al obtener sellados', xhr.status, xhr.responseText);
@@ -568,15 +493,18 @@
                     });
             }
 
-            function setSellados(s1, s2) {
+            function setSellados(s1, s2, importe) {
                 $('#ValorSellado1').val(s1 ?? 0);
                 $('#ValorSellado2').val(s2 ?? 0);
+                $('#ImporteCuota').val(importe ?? 0);
             }
 
             function limpiarSellados() {
                 $('#ValorSellado1').val('');
                 $('#ValorSellado2').val('');
+                $('#ImporteCuota').val('');
             }
         })();
     </script>
 }
+

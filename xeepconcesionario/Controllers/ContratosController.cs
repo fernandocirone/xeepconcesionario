@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using xeepconcesionario.Data;
+using xeepconcesionario.Models;
+using xeepconcesionario.Models.Dto;
 
 namespace xeepconcesionario.Controllers
 {
@@ -25,15 +27,62 @@ namespace xeepconcesionario.Controllers
         }
 
         [HttpPost]
-        public IActionResult CrearDesdeSolicitud([FromForm] Contrato contrato)
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> CrearDesdeSolicitud([FromBody] ContratoDto dto)
         {
+            var solicitud = await _context.Solicitudes
+                .FirstOrDefaultAsync(s => s.SolicitudId == dto.SolicitudId);
+
+            if (solicitud == null)
+                return Json(new { success = false, message = "Solicitud inválida" });
+
+            var vehiculo = await _context.Vehiculos
+                .FirstOrDefaultAsync(v => v.Id == dto.VehiculoId);
+
+            if (vehiculo == null)
+                return Json(new { success = false, message = "Vehículo inválido" });
+
+            // Buscar si ya existe contrato para esta solicitud
+            var contrato = await _context.Contratos
+                .FirstOrDefaultAsync(c => c.SolicitudId == solicitud.SolicitudId);
+
+            if (contrato == null)
+            {
+                // Crear nuevo
+                contrato = new Contrato
+                {
+                    SolicitudId = solicitud.SolicitudId,
+                    VehiculoId = vehiculo.Id,
+                    NombreContrato = dto.NombreContrato,
+                    DescripcionContrato = dto.DescripcionContrato,
+                    PlazoMeses = dto.PlazoMeses,
+                    CantidadCuotas = dto.CantidadCuotas,
+                    MontoCuota = dto.MontoCuota,
+                    ValorTransferencia = dto.ValorTransferencia
+                };
 
                 _context.Contratos.Add(contrato);
-                _context.SaveChanges();
+            }
+            else
+            {
+                // Editar existente
+                contrato.VehiculoId = vehiculo.Id;
+                contrato.NombreContrato = dto.NombreContrato;
+                contrato.DescripcionContrato = dto.DescripcionContrato;
+                contrato.PlazoMeses = dto.PlazoMeses;
+                contrato.CantidadCuotas = dto.CantidadCuotas;
+                contrato.MontoCuota = dto.MontoCuota;
+                contrato.ValorTransferencia = dto.ValorTransferencia;
 
-                return Json(new { success = true, id = contrato.ContratoId, nombre = contrato.NombreContrato });
+                _context.Contratos.Update(contrato);
+            }
 
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, contratoId = contrato.ContratoId });
         }
+
+
 
         // GET: Contratos/Details/5
         public async Task<IActionResult> Details(int? id)

@@ -1,0 +1,250 @@
+﻿@model IEnumerable<xeepconcesionario.Models.ActividadVehiculo>
+
+@{
+    ViewData["Title"] = "Actividades Vehículo";
+    var vehiculo = ViewBag.Vehiculo as xeepconcesionario.Models.Vehiculo;
+
+    string fechaDesde = ViewBag.FechaDesde ?? "";
+    string fechaHasta = ViewBag.FechaHasta ?? "";
+    string sucursal = ViewBag.Sucursal ?? "";
+    int? tipoActividadId = ViewBag.TipoActividadId as int?;
+}
+@{
+    decimal totalMonto = Model?.Sum(a => a.Monto ?? 0) ?? 0;
+}
+
+
+<div class="container-fluid">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="text-primary m-0">
+            ACTIVIDADES DEL VEHÍCULO
+            <small>(@vehiculo?.Patente - @vehiculo?.Modelo)</small>
+        </h2>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Vehiculos" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left-circle"></i> Volver a Vehículos
+            </a>
+
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevaActividad">
+                <i class="bi bi-plus-circle"></i> Nueva Actividad
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="mb-3 d-flex align-items-end gap-2 flex-wrap">
+        <input type="hidden" name="vehiculoId" value="@vehiculo?.Id" />
+
+        <div>
+            <label class="form-label">Desde</label>
+            <input type="date" class="form-control form-control-sm" name="fechaDesde" value="@fechaDesde" />
+        </div>
+        <div>
+            <label class="form-label">Hasta</label>
+            <input type="date" class="form-control form-control-sm" name="fechaHasta" value="@fechaHasta" />
+        </div>
+        <div>
+            <label class="form-label">Sucursal</label>
+            <input type="text" class="form-control form-control-sm" name="sucursal" value="@sucursal" />
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="table-responsive" style="max-height:65vh; overflow:auto;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info m-0">No hay actividades registradas.</div>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="position:sticky;top:0;z-index:2;">Fecha</th>
+                        <th style="position:sticky;top:0;z-index:2;">Tipo</th>
+                        <th style="position:sticky;top:0;z-index:2;">Monto</th>
+                        <th style="position:sticky;top:0;z-index:2;">Sucursal</th>
+                        <th style="position:sticky;top:0;z-index:2;">Usuario</th>
+                        <th style="position:sticky;top:0;z-index:2;">Observación</th>
+                        <th style="position:sticky;top:0;z-index:2;">Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var act in Model)
+                    {
+                        <tr>
+                            <td>@act.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@act.TipoActividadVehiculo?.NombreTipoActividadVehiculo</td>
+                            <td>@(act.Monto?.ToString("C") ?? "-")</td>
+                            <td>@act.Sucursal?.NombreSucursal</td>
+                            <td>@act.Usuario?.NombreCompleto</td>
+                            <td>@act.Observacion</td>
+                            <td class="text-nowrap">
+                                <button type="button"
+                                        class="btn btn-warning btn-sm btn-editar"
+                                        data-id="@act.Id"
+                                        data-tipo="@act.TipoActividadVehiculoId"
+                                        data-fecha="@act.Fecha.ToString("yyyy-MM-dd")"
+                                        data-monto="@act.Monto"
+                                        data-sucursal="@act.SucursalId"
+                                        data-obs="@act.Observacion"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarActividad">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </button>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    @if (Model != null && Model.Any())
+    {
+        <div class="mt-3 d-flex justify-content-end">
+            <div class="border rounded p-3 bg-light d-flex gap-4">
+                <div><strong>Total monto:</strong> @totalMonto.ToString("C")</div>
+            </div>
+        </div>
+    }
+
+</div>
+
+<!-- Modal Nueva Actividad -->
+<div class="modal fade" id="modalNuevaActividad" tabindex="-1" aria-labelledby="modalNuevaActividadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="Create" asp-controller="ActividadesVehiculo" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="VehiculoId" value="@vehiculo?.Id" />
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalNuevaActividadLabel">Nueva Actividad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" name="TipoActividadVehiculoId" required
+                                    asp-items="ViewBag.TipoActividadVehiculoId">
+                                <option value="">-- Seleccionar --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" name="Fecha"
+                                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Monto</label>
+                            <input type="number" step="0.01" min="0" class="form-control" name="Monto" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Sucursal</label>
+                            <select class="form-select" name="SucursalId" asp-items="ViewBag.SucursalId">
+                                <option value="">-- Seleccionar --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Observación</label>
+                            <textarea class="form-control" name="Observacion" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check2-circle"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Actividad -->
+<div class="modal fade" id="modalEditarActividad" tabindex="-1" aria-labelledby="modalEditarActividadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="Edit" asp-controller="ActividadesVehiculo" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="edit_Id" />
+                <input type="hidden" name="VehiculoId" value="@vehiculo?.Id" />
+
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="modalEditarActividadLabel">Editar Actividad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" id="edit_Tipo" name="TipoActividadVehiculoId" required
+                                    asp-items="ViewBag.TipoActividadVehiculoId"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="edit_Fecha" name="Fecha" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Monto</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="edit_Monto" name="Monto" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Sucursal</label>
+                            <select class="form-select" id="edit_Sucursal" name="SucursalId"
+                                    asp-items="ViewBag.SucursalId"></select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Observación</label>
+                            <textarea class="form-control" id="edit_Observacion" name="Observacion" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check2-circle"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-editar');
+        if (!btn) return;
+
+        document.getElementById('edit_Id').value = btn.dataset.id;
+        document.getElementById('edit_Tipo').value = btn.dataset.tipo;
+        document.getElementById('edit_Fecha').value = btn.dataset.fecha;
+        document.getElementById('edit_Monto').value = btn.dataset.monto;
+        document.getElementById('edit_Sucursal').value = btn.dataset.sucursal;
+        document.getElementById('edit_Observacion').value = btn.dataset.obs;
+    });
+</script>
+

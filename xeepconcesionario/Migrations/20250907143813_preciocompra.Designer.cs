@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using xeepconcesionario.Data;
@@ -11,9 +12,11 @@ using xeepconcesionario.Data;
 namespace xeepconcesionario.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250907143813_preciocompra")]
+    partial class preciocompra
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -812,11 +815,6 @@ namespace xeepconcesionario.Migrations
                         {
                             TipousuarioId = 3,
                             Nombretipousuario = "Jefe de Ventas"
-                        },
-                        new
-                        {
-                            TipousuarioId = 4,
-                            Nombretipousuario = "Admin"
                         });
                 });
 
@@ -1117,7 +1115,7 @@ namespace xeepconcesionario.Migrations
                     b.HasOne("Cliente", "Cliente")
                         .WithMany("Solicitudes")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CondicionVenta", "CondicionVenta")

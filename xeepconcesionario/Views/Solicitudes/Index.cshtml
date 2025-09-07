@@ -23,6 +23,11 @@
 
                 <a class="btn btn-primary" asp-controller="Clientes" asp-action="Index">Clientes</a>
 
+                <a class="btn btn-success"
+                   href="@Url.Action("Index", "Planes")">
+                    <i class="bi bi-list-check"></i> Planes
+                </a>
+
 
                 @{
                     var route = new RouteValueDictionary();

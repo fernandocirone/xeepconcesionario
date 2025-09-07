@@ -9,11 +9,11 @@ namespace xeepconcesionario.Models
         public int SolicitudId { get; set; }
 
         // --- Cliente ---
-        public int? ClienteId { get; set; }                       // si viene, usa existente
-        public bool CrearClienteNuevo { get; set; } = true;      // si true, ignora ClienteId
-        public Cliente ClienteNuevo { get; set; } = new();        // se postea con ClienteNuevo.Prop
+        public int? ClienteId { get; set; }
+        public bool CrearClienteNuevo { get; set; } = true;
+        public Cliente ClienteNuevo { get; set; } = new();
 
-        // --- Usuarios (nuevo: Id string de AspNetUsers) ---
+        // --- Usuarios ---
         public string? VendedorUserId { get; set; }
         public string? SupervisorUserId { get; set; }
         public string? JefeVentasUserId { get; set; }
@@ -33,7 +33,6 @@ namespace xeepconcesionario.Models
         [DataType(DataType.Date)]
         public DateTime? FechaCarga { get; set; }
 
-        public int? NumeroSorteo { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime? FechaSuscripcion { get; set; }
@@ -50,7 +49,7 @@ namespace xeepconcesionario.Models
 
         public List<ActividadSolicitud> Actividades { get; set; } = new();
 
-        // --- 👇 Campos “de nombre” para usar en Details ---
+        // --- Campos “de nombre” para usar en Details ---
         public string? PlanNombre { get; set; }
         public string? CondicionVentaNombre { get; set; }
         public string? TipoBajaNombre { get; set; }
@@ -60,6 +59,5 @@ namespace xeepconcesionario.Models
         public string? JefeVentasNombre { get; set; }
         public string? ClienteNombre { get; set; }
         public string? LocalidadNombre { get; set; }
-        public string? ContratoNombre { get; set; }
     }
 }

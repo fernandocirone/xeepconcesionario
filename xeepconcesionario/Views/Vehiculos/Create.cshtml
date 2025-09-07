@@ -1,0 +1,93 @@
+﻿@model xeepconcesionario.Models.Vehiculo
+
+@{
+    Layout = null; // porque se va a cargar dentro del modal
+}
+
+<div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">Nuevo Vehículo</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+
+<div class="modal-body">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Patente" class="form-label"></label>
+            <input asp-for="Patente" class="form-control" />
+            <span asp-validation-for="Patente" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Tipo" class="form-label"></label>
+            <select asp-for="Tipo" class="form-select"
+                    asp-items="Html.GetEnumSelectList<xeepconcesionario.Models.TipoVehiculo>()">
+                <option value="">-- Seleccionar --</option>
+            </select>
+            <span asp-validation-for="Tipo" class="text-danger"></span>
+        </div>
+
+
+        <div class="mb-3">
+            <label asp-for="Modelo" class="form-label"></label>
+            <input asp-for="Modelo" class="form-control" />
+            <span asp-validation-for="Modelo" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Año" class="form-label"></label>
+            <input asp-for="Año" class="form-control" type="number" />
+            <span asp-validation-for="Año" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Color" class="form-label"></label>
+            <input asp-for="Color" class="form-control" />
+            <span asp-validation-for="Color" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PrecioCompra" class="form-label">Precio Compra</label>
+            <input asp-for="PrecioCompra" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="PrecioCompra" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Valor" class="form-label"></label>
+            <input asp-for="Valor" class="form-control" type="number" step="0.01" />
+            <span asp-validation-for="Valor" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FechaAlta" class="form-label"></label>
+            <input asp-for="FechaAlta" class="form-control" type="date" />
+            <span asp-validation-for="FechaAlta" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sucursal</label>
+            <select class="form-select" name="SucursalId" asp-items="ViewBag.SucursalId">
+                <option value="">-- Seleccionar --</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Observacion" class="form-label"></label>
+            <textarea asp-for="Observacion" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Observacion" class="text-danger"></span>
+        </div>
+
+
+
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

@@ -8,6 +8,7 @@ namespace xeepconcesionario.Models
     {
         public int SolicitudId { get; set; }
         public int? ContratoId { get; set; }
+        public Contrato? Contrato { get; set; }
 
         public  int NumeroSolicitud { get; set; }
 

@@ -1,0 +1,85 @@
+﻿@model IEnumerable<xeepconcesionario.Models.ActividadVehiculo>
+
+@{
+    ViewData["Title"] = "Actividades de Vehículos";
+
+    string fechaDesde = ViewBag.FechaDesde ?? "";
+    string fechaHasta = ViewBag.FechaHasta ?? "";
+    string sucursal = ViewBag.Sucursal ?? "";
+    int? tipoActividadId = ViewBag.TipoActividadId as int?;
+}
+
+<div class="container-fluid">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="text-primary m-0">ACTIVIDADES DE VEHÍCULOS</h2>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Vehiculos" asp-action="Index" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left-circle"></i> Volver a Vehículos
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="mb-3 d-flex align-items-end gap-2 flex-wrap">
+        <div>
+            <label class="form-label">Desde</label>
+            <input type="date" class="form-control form-control-sm" name="fechaDesde" value="@fechaDesde" />
+        </div>
+        <div>
+            <label class="form-label">Hasta</label>
+            <input type="date" class="form-control form-control-sm" name="fechaHasta" value="@fechaHasta" />
+        </div>
+        <div>
+            <label class="form-label">Sucursal</label>
+            <input type="text" class="form-control form-control-sm" name="sucursal" value="@sucursal" />
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="table-responsive" style="max-height:65vh; overflow:auto;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info m-0">No hay actividades registradas.</div>
+        }
+        else
+        {
+            <table class="table table-sm table-striped table-hover table-bordered align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="position:sticky;top:0;z-index:2;">Fecha</th>
+                        <th style="position:sticky;top:0;z-index:2;">Vehículo</th>
+                        <th style="position:sticky;top:0;z-index:2;">Patente</th>
+                        <th style="position:sticky;top:0;z-index:2;">Tipo</th>
+                        <th style="position:sticky;top:0;z-index:2;">Monto</th>
+                        <th style="position:sticky;top:0;z-index:2;">Sucursal</th>
+                        <th style="position:sticky;top:0;z-index:2;">Usuario</th>
+                        <th style="position:sticky;top:0;z-index:2;">Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var act in Model)
+                    {
+                        <tr>
+                            <td>@act.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@act.Vehiculo?.Modelo</td>
+                            <td>@act.Vehiculo?.Patente</td>
+                            <td>@act.TipoActividadVehiculo?.NombreTipoActividadVehiculo</td>
+                            <td>@(act.Monto?.ToString("C") ?? "-")</td>
+                            <td>@act.Sucursal?.NombreSucursal</td>
+                            <td>@act.Usuario?.NombreCompleto</td>
+                            <td>@act.Observacion</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

@@ -34,11 +34,16 @@ namespace xeepconcesionario.Controllers
         {
             // Defaults de fechas (si no las pasan)
             var hoy = DateTime.Today;
+
+            // Primer día del mes
             var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
-            var finAnio = inicioMes.AddYears(1);
+
+            // Último día del mes
+            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
 
             fechaDesde ??= inicioMes.ToString("yyyy-MM-dd");
-            fechaHasta ??= finAnio.ToString("yyyy-MM-dd");
+            fechaHasta ??= finMes.ToString("yyyy-MM-dd");
 
             // Parseos seguros
             DateTime? dDesde = DateTime.TryParseExact(fechaDesde, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d1) ? d1 : (DateTime?)null;
@@ -48,6 +53,7 @@ namespace xeepconcesionario.Controllers
                 .Include(c => c.Solicitud).ThenInclude(s => s.Cliente)
                 .Include(c => c.Solicitud).ThenInclude(s => s.Supervisor)
                 .Include(c => c.Solicitud).ThenInclude(s => s.Estado)
+                .OrderBy(c => c.FechaVencimiento)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -79,7 +85,7 @@ namespace xeepconcesionario.Controllers
                     .ToLower().Contains(nombreSupervisor.ToLower()));
 
             var cuotas = await query
-                .OrderBy(c => c.SolicitudId)
+                .OrderBy(c => c.FechaVencimiento)
                 .ThenBy(c => c.Numerocuota)
                 .ToListAsync();
 
@@ -109,17 +115,17 @@ namespace xeepconcesionario.Controllers
             string? nombreSupervisor     // texto en Supervisor.NombreCompleto (si tenés esa relación)
         )
         {
-            // Defaults de fechas (si no las pasan)
             var hoy = DateTime.Today;
 
-            // Primer día del mes actual
+            // Primer día del mes
             var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
 
-            // Mismo día del año siguiente (1º del mismo mes pero +1 año)
-            var finAnio = inicioMes.AddYears(1);
+            // Último día del mes
+            var finMes = inicioMes.AddYears(1).AddDays(-1);
+
 
             fechaDesde ??= inicioMes.ToString("yyyy-MM-dd");
-            fechaHasta ??= finAnio.ToString("yyyy-MM-dd");
+            fechaHasta ??= finMes.ToString("yyyy-MM-dd");
 
 
 
@@ -199,11 +205,16 @@ namespace xeepconcesionario.Controllers
         {
             // Defaults de fechas
             var hoy = DateTime.Today;
+
+            // Primer día del mes
             var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
-            var finAnio = inicioMes.AddYears(1);
+
+            // Último día del mes
+            var finMes = inicioMes.AddMonths(1).AddDays(-1);
+
 
             fechaDesde ??= inicioMes.ToString("yyyy-MM-dd");
-            fechaHasta ??= finAnio.ToString("yyyy-MM-dd");
+            fechaHasta ??= finMes.ToString("yyyy-MM-dd");
 
             DateTime? dDesde = DateTime.TryParseExact(fechaDesde, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d1) ? d1 : (DateTime?)null;
             DateTime? dHasta = DateTime.TryParseExact(fechaHasta, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d2) ? d2 : (DateTime?)null;
@@ -322,6 +333,7 @@ namespace xeepconcesionario.Controllers
                     cuota.SaldoCuota = saldo;
                     // resetear fecha de pago
                     cuota.FechaPago = null;
+                    cuota.EstadoCuota = Cuota.Estado.Pendiente;
 
                     _context.Update(cuota);
                 }

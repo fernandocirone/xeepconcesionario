@@ -44,10 +44,17 @@ namespace xeepconcesionario.Controllers
         {
             var datos = await _context.Planes
                 .Where(a => a.PlanId == id)
-                .Select(a => new { sellado1 = a.Sellado, sellado2 = a.Sellado})
+                .Select(a => new
+                {
+                    sellado1 = a.Sellado,
+                    sellado2 = a.Sellado,
+                    importeCuota = a.CuotaIngreso   // 👈 agregado acá
+                })
                 .FirstOrDefaultAsync();
 
-            if (datos is null) return NotFound();
+            if (datos is null)
+                return NotFound();
+
             return Json(datos);
         }
 

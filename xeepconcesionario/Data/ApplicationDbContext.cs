@@ -78,6 +78,21 @@ namespace xeepconcesionario.Data
                 .WithMany(t => t.Usuarios)
                 .HasForeignKey(ut => ut.TipoUsuarioId);
 
+            // CORRECTO
+            modelBuilder.Entity<Solicitud>()
+                .HasOne(s => s.Contrato)     // ✅ navegación en Solicitud
+                .WithOne(c => c.Solicitud)
+                .HasForeignKey<Contrato>(c => c.SolicitudId);
+
+
+            // Relación 1:N entre Vehiculo y Contrato
+            modelBuilder.Entity<Contrato>()
+                .HasOne(c => c.Vehiculo)
+                .WithMany(v => v.Contratos)   // un vehículo puede tener varios contratos a lo largo de su vida
+                .HasForeignKey(c => c.VehiculoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             // Cobro ↔ Cuota
             modelBuilder.Entity<Cobro>()
                 .HasOne(c => c.Cuota)
@@ -114,7 +129,8 @@ namespace xeepconcesionario.Data
             modelBuilder.Entity<TipoUsuario>().HasData(
                 new TipoUsuario { TipousuarioId = 1, Nombretipousuario = "Vendedor" },
                 new TipoUsuario { TipousuarioId = 2, Nombretipousuario = "Supervisor" },
-                new TipoUsuario { TipousuarioId = 3, Nombretipousuario = "Jefe de Ventas" }
+                new TipoUsuario { TipousuarioId = 3, Nombretipousuario = "Jefe de Ventas" },
+                new TipoUsuario { TipousuarioId = 4, Nombretipousuario = "Admin" }
             );
 
             // Localización
@@ -168,6 +184,14 @@ namespace xeepconcesionario.Data
                 .WithMany()
                 .HasForeignKey(av => av.SucursalId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Solicitud ↔ Cliente (N..1)
+            modelBuilder.Entity<Solicitud>()
+                .HasOne(s => s.Cliente)
+                .WithMany(c => c.Solicitudes)
+                .HasForeignKey(s => s.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // ActividadVehiculo ↔ Usuario (N..1 requerido)
             modelBuilder.Entity<ActividadVehiculo>()

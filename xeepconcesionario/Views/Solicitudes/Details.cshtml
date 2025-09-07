@@ -1,17 +1,17 @@
-﻿@model CreateSolicitudViewModel
+﻿@model SolicitudDetailsViewModel
 @{
     ViewData["Title"] = "Detalle Solicitud";
 }
 
 <div class="row g-2">
-    <div class="col-md-4"><strong>Negociación:</strong> @Model.ContratoNombre</div>
+
     <div class="col-md-4"><strong>Número Solicitud:</strong> @Model.NumeroSolicitud</div>
     <div class="col-md-4"><strong>Vendedor:</strong> @Model.VendedorNombre</div>
-
     <div class="col-md-4"><strong>Supervisor:</strong> @Model.SupervisorNombre</div>
     <div class="col-md-4"><strong>Jefe de Ventas:</strong> @Model.JefeVentasNombre</div>
     <div class="col-md-4"><strong>Cliente:</strong> @Model.ClienteNombre</div>
 
+    <!-- Datos del cliente -->
     <div class="col-12 border rounded p-2 bg-light">
         <div class="row g-2">
             <div class="col-md-4"><strong>Apellido y Nombre:</strong> @Model.ClienteNuevo.ApellidoYNombre</div>
@@ -45,6 +45,7 @@
         </div>
     </div>
 
+    <!-- Info solicitud -->
     <div class="col-md-4"><strong>Plan:</strong> @Model.PlanNombre</div>
     <div class="col-md-4"><strong>Condición de venta:</strong> @Model.CondicionVentaNombre</div>
     <div class="col-md-4"><strong>Tipo de baja:</strong> @Model.TipoBajaNombre</div>
@@ -64,6 +65,48 @@
 </div>
 
 <hr />
+
+<!-- ================== CONTRATO ================== -->
+<h3>Contrato</h3>
+
+@if (Model.Contrato == null)
+{
+    <p><em>No hay contrato asociado a esta solicitud.</em></p>
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalContrato">
+        <i class="bi bi-file-earmark-plus"></i> Generar Contrato
+    </button>
+}
+else
+{
+    <div class="border rounded p-3 bg-light mb-3">
+        <div class="row g-2">
+            <div class="col-md-4"><strong>Nombre:</strong> @Model.Contrato.NombreContrato</div>
+            <div class="col-md-4"><strong>Plazo (meses):</strong> @Model.Contrato.PlazoMeses</div>
+            <div class="col-md-4"><strong>Cantidad Cuotas:</strong> @Model.Contrato.CantidadCuotas</div>
+            <div class="col-md-4"><strong>Monto Cuota:</strong> @Model.Contrato.MontoCuota</div>
+            <div class="col-md-4"><strong>Valor Transferencia:</strong> @Model.Contrato.ValorTransferencia</div>
+
+            <!-- 🚗 Datos del vehículo -->
+            <div class="col-md-4">
+                <strong>Vehículo:</strong>
+                @(Model.Contrato.Vehiculo != null
+                    ? $"{Model.Contrato.Vehiculo.Patente} - {Model.Contrato.Vehiculo.Modelo}"
+                    : "—")
+            </div>
+
+            <div class="col-md-12"><strong>Descripción:</strong> @Model.Contrato.DescripcionContrato</div>
+        </div>
+    </div>
+
+
+    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalContrato">
+        <i class="bi bi-pencil-square"></i> Editar Contrato
+    </button>
+}
+
+<hr />
+
+<!-- ================== HISTORIAL ACTIVIDADES ================== -->
 <h3>Historial de actividades</h3>
 
 @if (Model.Actividades != null && Model.Actividades.Any())
@@ -100,6 +143,84 @@ else
         <i class="bi bi-plus-circle"></i> Nueva actividad
     </button>
 </div>
+
+
+<!-- ================== MODAL CONTRATO ================== -->
+<div class="modal fade" id="modalContrato" tabindex="-1" aria-labelledby="modalContratoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modalContratoLabel" class="modal-title">
+                    @(Model.Contrato == null ? "Nuevo Contrato" : "Editar Contrato")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formContrato">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="SolicitudId" value="@Model.SolicitudId" />
+
+                    <div class="mb-3">
+                        <label for="NombreContrato" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="NombreContrato"
+                               value="@Model.Contrato?.NombreContrato" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="DescripcionContrato" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="DescripcionContrato">@Model.Contrato?.DescripcionContrato</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="PlazoMeses" class="form-label">Plazo (meses)</label>
+                        <input type="number" class="form-control" id="PlazoMeses"
+                               value="@Model.Contrato?.PlazoMeses" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="VehiculoId" class="form-label">Vehículo</label>
+                        <select class="form-select" id="VehiculoId">
+                            <option value="">-- Seleccione un vehículo --</option>
+                            @foreach (var v in ViewBag.Vehiculos)
+                            {
+                                <option value="@v.Id">@v.Texto</option>
+                            }
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="CantidadCuotas" class="form-label">Cantidad de cuotas</label>
+                        <input type="number" class="form-control" id="CantidadCuotas"
+                               value="@Model.Contrato?.CantidadCuotas" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="MontoCuota" class="form-label">Monto de cuota</label>
+                        <input type="number" step="0.01" class="form-control" id="MontoCuota"
+                               value="@Model.Contrato?.MontoCuota" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ValorTransferencia" class="form-label">Valor de transferencia</label>
+                        <input type="number" step="0.01" class="form-control" id="ValorTransferencia"
+                               value="@Model.Contrato?.ValorTransferencia" />
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarContrato">
+                    <i class="bi bi-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal Nueva Actividad -->
 <div class="modal fade" id="modalNuevaActividad" tabindex="-1" aria-labelledby="modalNuevaActividadLabel" aria-hidden="true">
@@ -139,3 +260,42 @@ else
         <i class="bi bi-arrow-left"></i> Volver
     </a>
 </div>
+
+
+@section Scripts {
+    <script>
+        document.getElementById('btnGuardarContrato')
+            .addEventListener('click', function () {
+                const data = {
+                    SolicitudId: document.getElementById('SolicitudId').value,
+                    VehiculoId: document.getElementById('VehiculoId').value,
+                    NombreContrato: document.getElementById('NombreContrato').value,
+                    DescripcionContrato: document.getElementById('DescripcionContrato').value,
+                    PlazoMeses: document.getElementById('PlazoMeses').value,
+                    CantidadCuotas: document.getElementById('CantidadCuotas').value,
+                    MontoCuota: document.getElementById('MontoCuota').value,
+                    ValorTransferencia: document.getElementById('ValorTransferencia').value
+                };
+
+                const token = document.querySelector('#formContrato input[name="__RequestVerificationToken"]').value;
+
+                fetch('@Url.Action("CrearDesdeSolicitud", "Contratos")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(r => r.ok ? r.json() : Promise.reject(r))
+                    .then(resp => {
+                        if (resp.success) {
+                            location.reload();
+                        } else {
+                            alert('Error al guardar contrato: ' + (resp.message ?? 'Desconocido'));
+                        }
+                    })
+                    .catch(err => console.error('Error guardar contrato:', err));
+            });
+    </script>
+}

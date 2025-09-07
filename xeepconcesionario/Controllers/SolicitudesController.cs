@@ -55,7 +55,6 @@ namespace xeepconcesionario.Controllers
                     .AsNoTracking();
 
             // Combos rápidos de la vista de listado (si los usás)
-            ViewBag.ContratoId = new SelectList(await _context.Contratos.AsNoTracking().OrderBy(x => x.NombreContrato).ToListAsync(), "ContratoId", "NombreContrato");
             ViewBag.ClienteId = new SelectList(await _context.Clientes.AsNoTracking().OrderBy(c => c.ApellidoYNombre).ToListAsync(), "ClienteId", "ApellidoYNombre");
             ViewBag.PlanId = new SelectList(await _context.Planes.AsNoTracking().OrderBy(a => a.Modelo).ToListAsync(), "PlanId", "Modelo");
             ViewBag.CondicionVentaId = new SelectList(await _context.CondicionesVenta.AsNoTracking().OrderBy(c => c.NombreCondicionVenta).ToListAsync(), "CondicionVentaId", "NombreCondicionVenta", condicionVentaId);
@@ -142,9 +141,6 @@ namespace xeepconcesionario.Controllers
                 await _context.TiposBaja.AsNoTracking().OrderBy(x => x.NombreTipoBaja).ToListAsync(),
                 "TipoBajaId", "NombreTipoBaja");
 
-            ViewBag.ContratoId = new SelectList(
-                await _context.Contratos.AsNoTracking().OrderBy(x => x.NombreContrato).ToListAsync(),
-                "ContratoId", "NombreContrato");
 
             // Usuarios por rol
             ViewBag.VendedorUserId = await GetUsuariosPorTipoAsync(1, vendedorIdSel);
@@ -204,9 +200,7 @@ namespace xeepconcesionario.Controllers
                 await _context.TiposBaja.AsNoTracking().OrderBy(x => x.NombreTipoBaja).ToListAsync(),
                 "TipoBajaId", "NombreTipoBaja", s?.TipoBajaId);
 
-            ViewBag.ContratoId = new SelectList(
-                await _context.Contratos.AsNoTracking().OrderBy(x => x.NombreContrato).ToListAsync(),
-                "ContratoId", "NombreContrato", s?.ContratoId);
+
 
             // Usuarios (con vendedor preforzado si corresponde)
             var vendedorSel = vendedorIdForzado ?? s?.VendedorUserId;
@@ -245,7 +239,7 @@ namespace xeepconcesionario.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
            int id,
-           [Bind("SolicitudId,NumeroSolicitud,ContratoId,VendedorUserId,SupervisorUserId,JefeVentasUserId,UsuarioId,ClienteId,PlanId,CondicionVentaId,TipoBajaId,EstadoId,FechaCarga,FechaSuscripcion,ValorSellado1,ValorSellado2,CantidadCuotas,FechaPrimerVencimiento,ImporteCuota,ObservacionSolicitud")]
+           [Bind("SolicitudId,NumeroSolicitud,VendedorUserId,SupervisorUserId,JefeVentasUserId,UsuarioId,ClienteId,PlanId,CondicionVentaId,TipoBajaId,EstadoId,FechaCarga,FechaSuscripcion,ValorSellado1,ValorSellado2,CantidadCuotas,FechaPrimerVencimiento,ImporteCuota,ObservacionSolicitud")]
            Solicitud solicitud)
         {
             if (id != solicitud.SolicitudId) return NotFound();
@@ -307,7 +301,6 @@ namespace xeepconcesionario.Controllers
 
             return View(vm);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateSolicitudViewModel vm)
@@ -315,9 +308,10 @@ namespace xeepconcesionario.Controllers
             static DateTime AsUnspecified(DateTime dt) =>
                 DateTime.SpecifyKind(dt, DateTimeKind.Unspecified);
 
-            // fuerza “nuevo cliente” en esta pantalla
-            vm.CrearClienteNuevo = true;
-            ModelState.Remove(nameof(vm.ClienteId));  // <- clave
+            // Usuario logueado → si es vendedor, forzar VendedorUserId
+            var user = await _userManager.GetUserAsync(User);
+            if (user?.TiposUsuario?.Any(tu => tu.TipoUsuarioId == 1) == true)
+                vm.VendedorUserId = user.Id;
 
             if (vm.PlanId == 0)
                 ModelState.AddModelError(nameof(vm.PlanId), "Debe seleccionar un Plan.");
@@ -329,17 +323,58 @@ namespace xeepconcesionario.Controllers
             await using var tx = await _context.Database.BeginTransactionAsync();
             try
             {
-                // crear cliente nuevo
-                var cli = vm.ClienteNuevo ?? new Cliente();
-                _context.Clientes.Add(cli);
-                await _context.SaveChangesAsync();
-                var clienteId = cli.ClienteId;
+                int clienteId;
 
-                // normalizar fechas
+                if (vm.ClienteId.HasValue && vm.ClienteId.Value > 0)
+                {
+                    // Cliente existente → actualizar datos
+                    var clienteExistente = await _context.Clientes.FindAsync(vm.ClienteId.Value);
+                    if (clienteExistente != null)
+                    {
+                        clienteExistente.ApellidoYNombre = vm.ClienteNuevo.ApellidoYNombre;
+                        clienteExistente.Dni = vm.ClienteNuevo.Dni;
+                        clienteExistente.TelefonoFijo = vm.ClienteNuevo.TelefonoFijo;
+                        clienteExistente.TelefonoCelular = vm.ClienteNuevo.TelefonoCelular;
+                        clienteExistente.Mail = vm.ClienteNuevo.Mail;
+                        clienteExistente.FechaNacimiento = vm.ClienteNuevo.FechaNacimiento;
+                        clienteExistente.Direccion = vm.ClienteNuevo.Direccion;
+                        clienteExistente.Nacionalidad = vm.ClienteNuevo.Nacionalidad;
+                        clienteExistente.LocalidadId = vm.ClienteNuevo.LocalidadId;
+                        clienteExistente.Barrio = vm.ClienteNuevo.Barrio;
+                        clienteExistente.TipoVivienda = vm.ClienteNuevo.TipoVivienda;
+                        clienteExistente.TieneTarjetaCredito = vm.ClienteNuevo.TieneTarjetaCredito;
+                        clienteExistente.Sexo = vm.ClienteNuevo.Sexo;
+                        clienteExistente.EstadoCivil = vm.ClienteNuevo.EstadoCivil;
+                        clienteExistente.Ocupacion = vm.ClienteNuevo.Ocupacion;
+                        clienteExistente.Empresa = vm.ClienteNuevo.Empresa;
+                        clienteExistente.DomicilioLaboral = vm.ClienteNuevo.DomicilioLaboral;
+                        clienteExistente.Cargo = vm.ClienteNuevo.Cargo;
+                        clienteExistente.IngresosMensuales = vm.ClienteNuevo.IngresosMensuales;
+                        clienteExistente.TipoOcupacion = vm.ClienteNuevo.TipoOcupacion;
+                        clienteExistente.RazonSocial = vm.ClienteNuevo.RazonSocial;
+
+                        await _context.SaveChangesAsync();
+                        clienteId = clienteExistente.ClienteId;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("El cliente existente no fue encontrado.");
+                    }
+                }
+                else
+                {
+                    // Crear cliente nuevo
+                    var cli = vm.ClienteNuevo ?? new Cliente();
+                    _context.Clientes.Add(cli);
+                    await _context.SaveChangesAsync();
+                    clienteId = cli.ClienteId;
+                }
+
+                // Normalizar fechas
                 if (vm.FechaCarga.HasValue) vm.FechaCarga = AsUnspecified(vm.FechaCarga.Value);
                 if (vm.FechaSuscripcion.HasValue) vm.FechaSuscripcion = AsUnspecified(vm.FechaSuscripcion.Value);
 
-                // plan + importe
+                // Plan + importe
                 var plan = await _context.Planes.AsNoTracking()
                              .FirstOrDefaultAsync(p => p.PlanId == vm.PlanId)
                            ?? throw new InvalidOperationException("No se encontró el Plan seleccionado.");
@@ -347,20 +382,19 @@ namespace xeepconcesionario.Controllers
                 decimal importe = vm.ImporteCuota ?? plan.AdelantoMensual;
                 if (importe <= 0) throw new InvalidOperationException("El importe de la cuota calculado es inválido (<= 0).");
 
-                // fecha base día 10
+                // Fecha base (día 10)
                 var baseDate = vm.FechaPrimerVencimiento ?? vm.FechaSuscripcion ?? DateTime.Now;
                 var fechaBase = baseDate.Day >= 10
                     ? new DateTime(baseDate.Year, baseDate.Month, 10).AddMonths(1)
                     : new DateTime(baseDate.Year, baseDate.Month, 10);
                 fechaBase = AsUnspecified(fechaBase);
 
-                // solicitud (sellados pueden ser null)
+                // Crear solicitud
                 var solicitud = new Solicitud
                 {
                     UsuarioId = vm.UsuarioId!,
-                    ClienteId = clienteId,
+                    ClienteId = clienteId, // ✅ siempre apunta al cliente correcto
                     PlanId = vm.PlanId,
-                    ContratoId = vm.ContratoId,
                     FechaCarga = vm.FechaCarga,
                     FechaSuscripcion = vm.FechaSuscripcion,
                     ValorSellado1 = vm.ValorSellado1,
@@ -377,7 +411,7 @@ namespace xeepconcesionario.Controllers
                 _context.Solicitudes.Add(solicitud);
                 await _context.SaveChangesAsync();
 
-                // cuotas (blindar sellados)
+                // Cuotas (con sellados)
                 int cantidad = vm.CantidadCuotas <= 0 ? 99 : vm.CantidadCuotas;
                 var cuotas = new List<Cuota>(cantidad);
                 for (int n = 1; n <= cantidad; n++)
@@ -411,6 +445,8 @@ namespace xeepconcesionario.Controllers
         }
 
 
+
+
         private async Task CargarCombosCreate(CreateSolicitudViewModel vm)
         {
             var autos = await _context.Planes
@@ -442,10 +478,6 @@ namespace xeepconcesionario.Controllers
             ViewBag.TipoBajaId = new SelectList(
                 await _context.TiposBaja.AsNoTracking().OrderBy(x => x.NombreTipoBaja).ToListAsync(),
                 "TipoBajaId", "NombreTipoBaja", vm.TipoBajaId);
-
-            ViewBag.ContratoId = new SelectList(
-                await _context.Contratos.AsNoTracking().OrderBy(x => x.NombreContrato).ToListAsync(),
-                "ContratoId", "NombreContrato", vm.ContratoId);
 
             // Usuarios por rol
             ViewBag.VendedorUserId = await GetUsuariosPorTipoAsync(1, vm.VendedorUserId);
@@ -503,80 +535,51 @@ namespace xeepconcesionario.Controllers
                 .Include(s => s.JefeVentas)
                 .Include(s => s.Actividades).ThenInclude(a => a.EstadoActividad)
                 .Include(s => s.Actividades).ThenInclude(a => a.Usuario)
+                .Include(s => s.Contrato).ThenInclude(c => c.Vehiculo)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.SolicitudId == id);
 
             if (solicitud == null) return NotFound();
 
-            var vm = new CreateSolicitudViewModel
+            var vm = new SolicitudDetailsViewModel
             {
                 SolicitudId = solicitud.SolicitudId,
-                ContratoId = solicitud.ContratoId,
                 NumeroSolicitud = solicitud.NumeroSolicitud,
-                VendedorUserId = solicitud.VendedorUserId,
-                SupervisorUserId = solicitud.SupervisorUserId,
-                JefeVentasUserId = solicitud.JefeVentasUserId,
-                UsuarioId = solicitud.UsuarioId,
+                VendedorNombre = solicitud.Vendedor?.NombreCompleto ?? solicitud.Vendedor?.UserName,
+                SupervisorNombre = solicitud.Supervisor?.NombreCompleto ?? solicitud.Supervisor?.UserName,
+                JefeVentasNombre = solicitud.JefeVentas?.NombreCompleto ?? solicitud.JefeVentas?.UserName,
                 ClienteId = solicitud.ClienteId,
-                CrearClienteNuevo = false,
-                PlanId = solicitud.PlanId,
-                CondicionVentaId = solicitud.CondicionVentaId,
-                TipoBajaId = solicitud.TipoBajaId,
-                EstadoId = solicitud.EstadoId,
+                ClienteNombre = solicitud.Cliente?.ApellidoYNombre,
+                ClienteNuevo = solicitud.Cliente ?? new Cliente(),
+                LocalidadNombre = solicitud.Cliente?.Localidad?.NombreLocalidad,
+                PlanNombre = solicitud.Plan != null ? $"{solicitud.Plan.Codigo} - {solicitud.Plan.Modelo}" : null,
+                CondicionVentaNombre = solicitud.CondicionVenta?.NombreCondicionVenta,
+                TipoBajaNombre = solicitud.TipoBaja?.NombreTipoBaja,
+                EstadoNombre = solicitud.Estado?.NombreEstado,
                 FechaCarga = solicitud.FechaCarga,
                 FechaSuscripcion = solicitud.FechaSuscripcion,
                 ValorSellado1 = solicitud.ValorSellado1,
                 ValorSellado2 = solicitud.ValorSellado2,
                 ObservacionSolicitud = solicitud.ObservacionSolicitud,
-                Actividades = solicitud.Actividades.OrderByDescending(a => a.Fecha).ToList(),
-                // nombres “amigables”
-                PlanNombre = solicitud.Plan != null ? $"{solicitud.Plan.Codigo} - {solicitud.Plan.Modelo}" : null,
-                CondicionVentaNombre = solicitud.CondicionVenta?.NombreCondicionVenta,
-                TipoBajaNombre = solicitud.TipoBaja?.NombreTipoBaja,
-                EstadoNombre = solicitud.Estado?.NombreEstado,
-                VendedorNombre = solicitud.Vendedor?.NombreCompleto ?? solicitud.Vendedor?.UserName,
-                SupervisorNombre = solicitud.Supervisor?.NombreCompleto ?? solicitud.Supervisor?.UserName,
-                JefeVentasNombre = solicitud.JefeVentas?.NombreCompleto ?? solicitud.JefeVentas?.UserName,
-                ClienteNombre = solicitud.Cliente?.ApellidoYNombre,
-                LocalidadNombre = solicitud.Cliente?.Localidad?.NombreLocalidad,
-                ContratoNombre = solicitud.ContratoId?.ToString()
+                Contrato = solicitud.Contrato, // 👈 acá cargamos el contrato entero
+                Actividades = solicitud.Actividades.OrderByDescending(a => a.Fecha).ToList()
             };
 
-            if (solicitud.Cliente != null)
-            {
-                vm.ClienteNuevo = new Cliente
-                {
-                    ApellidoYNombre = solicitud.Cliente.ApellidoYNombre,
-                    Dni = solicitud.Cliente.Dni,
-                    TelefonoFijo = solicitud.Cliente.TelefonoFijo,
-                    TelefonoCelular = solicitud.Cliente.TelefonoCelular,
-                    Mail = solicitud.Cliente.Mail,
-                    FechaNacimiento = solicitud.Cliente.FechaNacimiento,
-                    Direccion = solicitud.Cliente.Direccion,
-                    Nacionalidad = solicitud.Cliente.Nacionalidad,
-                    LocalidadId = solicitud.Cliente.LocalidadId,
-                    Barrio = solicitud.Cliente.Barrio,
-                    TipoVivienda = solicitud.Cliente.TipoVivienda,
-                    Sexo = solicitud.Cliente.Sexo,
-                    EstadoCivil = solicitud.Cliente.EstadoCivil,
-                    Ocupacion = solicitud.Cliente.Ocupacion,
-                    Empresa = solicitud.Cliente.Empresa,
-                    DomicilioLaboral = solicitud.Cliente.DomicilioLaboral,
-                    Cargo = solicitud.Cliente.Cargo,
-                    IngresosMensuales = solicitud.Cliente.IngresosMensuales,
-                    TipoOcupacion = solicitud.Cliente.TipoOcupacion,
-                    RazonSocial = solicitud.Cliente.RazonSocial,
-                    TieneTarjetaCredito = solicitud.Cliente.TieneTarjetaCredito
-                };
-            }
-
-            await CargarCombosCreate(vm);
+            await CargarCombosCreate(new CreateSolicitudViewModel()); // para combos en modal actividad
             ViewBag.EstadosActividad = new SelectList(
                 await _context.EstadosActividad.AsNoTracking().OrderBy(e => e.NombreEstadoActividad).ToListAsync(),
                 "EstadoActividadId", "NombreEstadoActividad");
+            ViewBag.Vehiculos = await _context.Vehiculos
+                .AsNoTracking()
+                .OrderBy(v => v.Patente)
+                .Select(v => new { v.Id, Texto = v.Patente + " - " + v.Modelo })
+                .ToListAsync();
+
 
             return View(vm);
         }
+
+
 
         // =============== EXPORTAR EXCEL ===============
         [HttpGet]
@@ -828,21 +831,18 @@ namespace xeepconcesionario.Controllers
 
             return q;
         }
-
-        // =============== API: CHECK CLIENTE POR DNI ===============
         [HttpGet]
         public async Task<IActionResult> CheckClientePorDni(string dni)
         {
             if (string.IsNullOrWhiteSpace(dni))
                 return Json(new { exists = false });
 
-            // Normalizar DNI (sin puntos/guiones/espacios)
-            dni = dni.Trim()
-                     .Replace(".", string.Empty)
-                     .Replace("-", string.Empty);
+            dni = dni.Trim().Replace(".", "").Replace("-", "");
 
             var cliente = await _context.Clientes
                 .AsNoTracking()
+                .Include(c => c.Localidad).ThenInclude(l => l.Provincia)
+                .Include(c => c.Localidad).ThenInclude(l => l.Region)
                 .FirstOrDefaultAsync(c => c.Dni == dni);
 
             if (cliente == null)
@@ -861,15 +861,47 @@ namespace xeepconcesionario.Controllers
                 })
                 .ToListAsync();
 
+            // 👇 devolvemos sólo los campos planos que interesan
+            var clienteDto = new
+            {
+                cliente.ClienteId,
+                cliente.ApellidoYNombre,
+                cliente.Dni,
+                cliente.TelefonoFijo,
+                cliente.TelefonoCelular,
+                cliente.Mail,
+                cliente.FechaNacimiento,
+                cliente.Direccion,
+                cliente.Nacionalidad,
+                cliente.LocalidadId,
+                LocalidadNombre = cliente.Localidad?.NombreLocalidad,
+                ProvinciaNombre = cliente.Localidad?.Provincia?.NombreProvincia,
+                RegionNombre = cliente.Localidad?.Region?.NombreRegion,
+                cliente.Barrio,
+                cliente.TipoVivienda,
+                cliente.TieneTarjetaCredito,
+                cliente.Sexo,
+                cliente.EstadoCivil,
+                cliente.Ocupacion,
+                cliente.Empresa,
+                cliente.DomicilioLaboral,
+                cliente.Cargo,
+                cliente.IngresosMensuales,
+                cliente.TipoOcupacion,
+                cliente.RazonSocial
+            };
+
             return Json(new
             {
                 exists = true,
                 clienteId = cliente.ClienteId,
                 nombre = cliente.ApellidoYNombre,
                 solicitudesCount = solicitudes.Count,
-                solicitudes
+                solicitudes,
+                cliente = clienteDto
             });
         }
+
 
     }
 }

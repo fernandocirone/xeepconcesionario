@@ -1,144 +1,124 @@
 ﻿@model Cliente
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Cliente";
 }
 
-<h1>Details</h1>
+<h2 class="mb-3">Detalles del Cliente</h2>
 
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ApellidoYNombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ApellidoYNombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Dni)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Dni)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TelefonoFijo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TelefonoFijo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TelefonoCelular)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TelefonoCelular)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Mail)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Mail)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaNacimiento)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaNacimiento)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Direccion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Direccion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nacionalidad)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nacionalidad)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Barrio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Barrio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoVivienda)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoVivienda)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TieneTarjetaCredito)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TieneTarjetaCredito)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Sexo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sexo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EstadoCivil)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EstadoCivil)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Ocupacion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Ocupacion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Empresa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Empresa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DomicilioLaboral)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DomicilioLaboral)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Cargo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cargo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IngresosMensuales)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IngresosMensuales)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoOcupacion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoOcupacion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RazonSocial)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RazonSocial)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Localidad)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Localidad.LocalidadId)
-        </dd>
-    </dl>
+<div class="card mb-4">
+    <div class="card-body p-3">
+        <table class="table table-sm table-bordered align-middle">
+            <tbody>
+                <tr>
+                    <th>Nombre</th>
+                    <td>@Model.ApellidoYNombre</td>
+                    <th>DNI</th>
+                    <td>@Model.Dni</td>
+                </tr>
+                <tr>
+                    <th>Teléfono fijo</th>
+                    <td>@Model.TelefonoFijo</td>
+                    <th>Celular</th>
+                    <td>@Model.TelefonoCelular</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>@Model.Mail</td>
+                    <th>Fecha Nac.</th>
+                    <td>@Model.FechaNacimiento?.ToString("dd/MM/yyyy")</td>
+                </tr>
+                <tr>
+                    <th>Dirección</th>
+                    <td>@Model.Direccion</td>
+                    <th>Nacionalidad</th>
+                    <td>@Model.Nacionalidad</td>
+                </tr>
+                <tr>
+                    <th>Barrio</th>
+                    <td>@Model.Barrio</td>
+                    <th>Tipo Vivienda</th>
+                    <td>@Model.TipoVivienda</td>
+                </tr>
+                <tr>
+                    <th>Tarjeta Crédito</th>
+                    <td>@(Model.TieneTarjetaCredito == true ? "Sí" : "No")</td>
+                    <th>Sexo</th>
+                    <td>@Model.Sexo</td>
+                </tr>
+                <tr>
+                    <th>Estado Civil</th>
+                    <td>@Model.EstadoCivil</td>
+                    <th>Ocupación</th>
+                    <td>@Model.Ocupacion</td>
+                </tr>
+                <tr>
+                    <th>Empresa</th>
+                    <td>@Model.Empresa</td>
+                    <th>Domicilio Laboral</th>
+                    <td>@Model.DomicilioLaboral</td>
+                </tr>
+                <tr>
+                    <th>Cargo</th>
+                    <td>@Model.Cargo</td>
+                    <th>Ingresos</th>
+                    <td>@Model.IngresosMensuales</td>
+                </tr>
+                <tr>
+                    <th>Tipo Ocupación</th>
+                    <td>@Model.TipoOcupacion</td>
+                    <th>Razón Social</th>
+                    <td>@Model.RazonSocial</td>
+                </tr>
+                <tr>
+                    <th>Localidad</th>
+                    <td colspan="3">@Model.Localidad?.NombreLocalidad</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ClienteId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<!-- ================== Solicitudes ================== -->
+<h4>Solicitudes asociadas</h4>
+
+@if (Model.Solicitudes != null && Model.Solicitudes.Any())
+{
+    <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+            <tr>
+                <th># Solicitud</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Plan</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Solicitudes.OrderByDescending(x => x.FechaCarga))
+            {
+                <tr>
+                    <td>@s.NumeroSolicitud</td>
+                    <td>@s.FechaCarga?.ToString("dd/MM/yyyy")</td>
+                    <td>@s.Estado?.NombreEstado</td>
+                    <td>@(s.Plan != null ? $"{s.Plan.Codigo} - {s.Plan.Modelo}" : "—")</td>
+                    <td>
+                        <a asp-controller="Solicitudes" asp-action="Details" asp-route-id="@s.SolicitudId"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Ver
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">Este cliente no tiene solicitudes registradas.</div>
+}
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model?.ClienteId" class="btn btn-warning btn-sm">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary btn-sm">Volver al listado</a>
 </div>

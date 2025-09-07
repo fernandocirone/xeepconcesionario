@@ -1,0 +1,209 @@
+﻿@model IEnumerable<xeepconcesionario.Models.VehiculoIndexViewModel>
+@using Microsoft.AspNetCore.Routing
+
+@{
+    ViewData["Title"] = "Vehículos";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex flex-column" style="height: 80vh;">
+        <!-- Encabezado + Filtros -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="text-primary m-0">VEHÍCULOS</h2>
+
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <input type="text" class="form-control form-control-sm" id="filtroPatente" placeholder="Buscar por patente" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filtroModal">
+                    <i class="bi bi-funnel-fill"></i> Filtros
+                </button>
+
+                <a class="btn btn-success"
+                   href="@Url.Action("IndexTodos", "ActividadesVehiculo")">
+                    <i class="bi bi-list-check"></i> Actividades Vehículos
+                </a>
+
+
+                <button type="button" class="btn btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalVehiculo"
+                        data-url="@Url.Action("Create", "Vehiculos")">
+                    <i class="bi bi-plus-circle"></i> Nuevo Vehículo
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div id="tablaVehiculos" class="table-responsive flex-grow-1 overflow-auto border rounded" style="min-height:0;">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Patente</th>
+                        <th>Tipo Vehiculo</th>
+                        <th>Modelo</th>
+                        <th>Año</th>
+                        <th>Color</th>
+                        <th>Precio Compra</th>
+                        <th>Valor</th>
+                        <th>Monto Actividades</th>
+                        <th>Fecha Alta</th>
+                        <th>Sucursal</th>
+                        <th>Última Actividad</th>
+                        <th>Fecha Actividad</th>
+                        <th>Observación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="fila-vehiculo" data-id="@item.Id">
+                            <td>@item.Patente</td>
+                            <td>@item.Tipo.ToString()</td>   <!-- 👈 Mostrar enum como texto -->
+                            <td>@item.Modelo</td>
+                            <td>@item.Año</td>
+                            <td>@item.Color</td>
+                            <td>@item.PrecioCompra?.ToString("C")</td>
+                            <td>@item.Valor?.ToString("C")</td>
+                            <td>@item.MontoActividad.ToString("C")</td>
+                            <td>@(item.FechaAlta.HasValue ? item.FechaAlta.Value.ToString("dd/MM/yyyy") : "-")</td>
+                            <td>@item.Sucursal</td>
+                            <td>@item.UltimaActividadNombre</td>
+                            <td>@(item.UltimaActividadFecha?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>@item.Observacion</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botones fijos -->
+        <div class="mt-3 d-flex justify-content-end gap-2">
+            <button id="btnEliminar" class="btn btn-danger" disabled>Eliminar</button>
+            <button id="btnEditar" class="btn btn-warning" disabled>Editar</button>
+            <button id="btnDetalles" class="btn btn-secondary" disabled>Detalles</button>
+        </div>
+    </div>
+
+    <!-- Modal Filtros -->
+    <div class="modal fade" id="filtroModal" tabindex="-1" aria-labelledby="filtroModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="get" asp-action="Index">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filtroModalLabel">Filtrar Vehículos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Patente</label>
+                                <input type="text" class="form-control" name="patente" value="@ViewBag.Patente" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" name="tipo"
+                                        asp-items="Html.GetEnumSelectList<xeepconcesionario.Models.TipoVehiculo>()">
+                                    <option value="">-- Todos --</option>
+                                </select>
+                            </div>
+
+
+                            <div class="col-md-4">
+                                <label class="form-label">Modelo</label>
+                                <input type="text" class="form-control" name="modelo" value="@ViewBag.Modelo" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Año</label>
+                                <input type="number" class="form-control" name="año" value="@ViewBag.Año" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Color</label>
+                                <input type="text" class="form-control" name="color" value="@ViewBag.Color" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Fecha Alta desde</label>
+                                <input type="date" class="form-control" name="fechaDesde"
+                                       value="@(ViewBag.FechaDesde is DateTime d1 ? d1.ToString("yyyy-MM-dd") : "")" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Fecha Alta hasta</label>
+                                <input type="date" class="form-control" name="fechaHasta"
+                                       value="@(ViewBag.FechaHasta is DateTime d2 ? d2.ToString("yyyy-MM-dd") : "")" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <a class="btn btn-outline-secondary" href="@Url.Action("Index","Vehiculos")">Limpiar</a>
+                        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalVehiculo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="modalVehiculoContent">
+            <!-- acá se inyecta Create.cshtml -->
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        let idSeleccionado = null;
+
+        function setBotones(enabled) {
+            document.getElementById('btnEditar').disabled = !enabled;
+            document.getElementById('btnEliminar').disabled = !enabled;
+            document.getElementById('btnDetalles').disabled = !enabled;
+        }
+
+        function seleccionarFila(fila) {
+            document.querySelectorAll('.fila-vehiculo').forEach(f => f.classList.remove('table-primary'));
+            fila.classList.add('table-primary');
+            idSeleccionado = fila.dataset.id;
+            setBotones(true);
+        }
+
+        document.getElementById('tablaVehiculos')?.addEventListener('click', (ev) => {
+            const fila = ev.target.closest('.fila-vehiculo');
+            if (fila) seleccionarFila(fila);
+        });
+
+        document.getElementById('btnEditar')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Vehiculos/Edit/${idSeleccionado}`;
+        });
+        document.getElementById('btnEliminar')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/Vehiculos/Delete/${idSeleccionado}`;
+        });
+        document.getElementById('btnDetalles')?.addEventListener('click', () => {
+            if (idSeleccionado) window.location.href = `/ActividadesVehiculo/Index?vehiculoId=${idSeleccionado}`;
+        });
+
+
+        setBotones(false);
+
+        const modalVehiculo = document.getElementById('modalVehiculo');
+        modalVehiculo.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const url = button.getAttribute('data-url');
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('modalVehiculoContent').innerHTML = html;
+                });
+        });
+
+    </script>
+}
