@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using xeepconcesionario.Data;
 using xeepconcesionario.Models;
+using xeepconcesionario.Services;
 
 namespace xeepconcesionario.Controllers
 {
@@ -18,11 +19,13 @@ namespace xeepconcesionario.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IReceiptPdfService _pdf;
         private readonly UserManager<ApplicationUser> _userManager;
-        public CobrosController(ApplicationDbContext context, IReceiptPdfService pdf, UserManager<ApplicationUser> userManager)
+        private readonly ActividadSolicitudService _actividadService;
+        public CobrosController(ApplicationDbContext context, IReceiptPdfService pdf, UserManager<ApplicationUser> userManager, ActividadSolicitudService actividadService)
         {
             _context = context;
             _pdf = pdf;
             _userManager = userManager;
+            _actividadService = actividadService;
         }
         public async Task<IActionResult> Index(
             int? solicitudId,
@@ -153,9 +156,18 @@ namespace xeepconcesionario.Controllers
                 }
             }
 
+            // 3) Registrar la actividad automáticamente
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            await _actividadService.RegistrarActividadAsync(
+                solicitudId: model.SolicitudId,
+                estadoActividadId: 2, // Por ejemplo: 2 = "Pago de cuota"
+                observacion: $"Cobro de cuota #{cuota?.Numerocuota} por {model.Monto:C}. {model.ObservacionCobro}",
+                usuarioId: userId
+            );
+
             // En vez de generar y devolver el PDF acá...
             var urlRecibo = Url.Action("ReciboPorCuota", "Cobros", new { cuotaId = model.CuotaId });
-            var urlVolver = Url.Action("Index", "Cuotas", new { solicitudId = model.SolicitudId });
+            var urlVolver = Url.Action("Details", "Cuotas", new { solicitudId = model.SolicitudId });
 
             var html = $@"
                 <!doctype html>
@@ -181,7 +193,7 @@ namespace xeepconcesionario.Controllers
             if (monto <= 0)
             {
                 TempData["Error"] = "El monto debe ser mayor a cero.";
-                return RedirectToAction("Index", "Cuotas", new { solicitudId });
+                return RedirectToAction("Details", "Cuotas", new { solicitudId });
             }
 
             var fechaCobro = (fecha ?? DateTime.Today).Date;
@@ -199,7 +211,7 @@ namespace xeepconcesionario.Controllers
                 if (cuotas.Count == 0)
                 {
                     TempData["Info"] = "No hay cuotas con saldo pendiente para esta solicitud.";
-                    return RedirectToAction("Index", "Cuotas", new { solicitudId });
+                    return RedirectToAction("Details", "Cuotas", new { solicitudId });
                 }
 
                 decimal restante = monto;
@@ -264,18 +276,37 @@ namespace xeepconcesionario.Controllers
                 }
                 // ----------------------------------------------------
 
+                // 3) Registrar la actividad de cobro (resumen)
+                var cuotasPagadas = cuotas
+                    .Where(c => c.FechaPago == fechaCobro) // cuotas que se tocaron en este cobro
+                    .Select(c => c.Numerocuota)
+                    .ToList();
+
+                if (cuotasPagadas.Any())
+                {
+                    var detalle = string.Join(", ", cuotasPagadas);
+
+                    await _actividadService.RegistrarActividadAsync(
+                        solicitudId: solicitudId,
+                        estadoActividadId: 2, // "Pago de cuota"
+                        observacion: $"Cobro por monto {monto:C} aplicado a cuotas: {detalle}.",
+                        usuarioId: userId!
+                    );
+                }
+
+
                 await tx.CommitAsync();
 
                 if (restante > 0)
                     TempData["Info"] = $"Se cancelaron todas las cuotas pendientes. Sobró: {restante:C}.";
 
-                return RedirectToAction("Index", "Cuotas", new { solicitudId });
+                return RedirectToAction("Details", "Cuotas", new { solicitudId });
             }
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
                 TempData["Error"] = $"No se pudo procesar el cobro: {ex.Message}";
-                return RedirectToAction("Index", "Cuotas", new { solicitudId });
+                return RedirectToAction("Details", "Cuotas", new { solicitudId });
             }
         }
 

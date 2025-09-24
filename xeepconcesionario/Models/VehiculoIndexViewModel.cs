@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public string? Patente { get; set; }
         public TipoVehiculo Tipo { get; set; }
+        public EstadoVehiculo EstadoVehiculo { get; set; }
         public string? Modelo { get; set; }
         public int? Año { get; set; }
         public string? Color { get; set; }

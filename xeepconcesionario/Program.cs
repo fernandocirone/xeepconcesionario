@@ -8,6 +8,7 @@ using xeepconcesionario.Binders;
 using QuestPDF.Infrastructure;
 using System.Security.Claims;
 using xeepconcesionario;
+using xeepconcesionario.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +126,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = new[] { numberCulture };
     options.SupportedUICultures = new[] { uiCulture };
 });
+
+builder.Services.AddScoped<ActividadSolicitudService>();
+
 
 var app = builder.Build();
 

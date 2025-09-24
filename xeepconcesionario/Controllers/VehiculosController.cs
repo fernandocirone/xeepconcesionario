@@ -60,6 +60,7 @@ namespace xeepconcesionario.Controllers
                     PrecioCompra = v.PrecioCompra,
                     Valor = v.Valor,
                     FechaAlta = v.FechaAlta,
+                    EstadoVehiculo = v.EstadoVehiculo,
                     Observacion = v.Observacion,
 
                     UltimaActividadNombre = v.Actividades
@@ -126,7 +127,7 @@ namespace xeepconcesionario.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("Id,Patente,Tipo,Modelo,Año,Color,PrecioCompra,Valor,FechaAlta,Observacion")] Vehiculo vehiculo,
+            [Bind("Id,Patente,Tipo, EstadoVehiculo, Modelo,Año,Color,PrecioCompra,Valor,FechaAlta,Observacion")] Vehiculo vehiculo,
             int sucursalId
         )
         {
@@ -180,7 +181,7 @@ namespace xeepconcesionario.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Patente,Tipo,Modelo,Año,Color,PrecioCompra,Valor,FechaAlta,Observacion")] Vehiculo vehiculo)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Patente,Tipo, EstadoVehiculo,Modelo,Año,Color,PrecioCompra,Valor,FechaAlta,Observacion")] Vehiculo vehiculo)
         {
             if (id != vehiculo.Id)
             {

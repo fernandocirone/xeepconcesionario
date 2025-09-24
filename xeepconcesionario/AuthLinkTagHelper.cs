@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+
 namespace xeepconcesionario
 {
-
-
     [HtmlTargetElement("auth-link")]
     public class AuthLinkTagHelper : TagHelper
     {
@@ -19,7 +17,10 @@ namespace xeepconcesionario
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string Policy { get; set; }
+        /// <summary>
+        /// Nombre de la policy que debe cumplir el usuario.
+        /// </summary>
+        public string Policy { get; set; } = string.Empty;
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
@@ -28,9 +29,15 @@ namespace xeepconcesionario
 
             if (!result.Succeeded)
             {
-                output.SuppressOutput(); // oculta el link
+                // No autorizado → no renderiza nada
+                output.SuppressOutput();
+            }
+            else
+            {
+                // Autorizado → quita el tag <auth-link> y deja solo el contenido
+                output.TagName = null;
+                output.TagMode = TagMode.StartTagAndEndTag;
             }
         }
     }
-
 }

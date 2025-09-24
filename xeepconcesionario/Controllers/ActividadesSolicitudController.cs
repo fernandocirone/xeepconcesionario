@@ -83,6 +83,8 @@ namespace xeepconcesionario.Controllers
             return View(actividad);
         }
 
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFromDetails(int SolicitudId, int EstadoActividadId, string? Observacion)

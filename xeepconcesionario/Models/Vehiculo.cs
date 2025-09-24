@@ -23,6 +23,8 @@ namespace xeepconcesionario.Models
         public DateTime FechaAlta { get; set; } = DateTime.Now;
         public string? Observacion { get; set; }
 
+        public EstadoVehiculo EstadoVehiculo { get; set; }
+
         public ICollection<ActividadVehiculo> Actividades { get; set; } = new List<ActividadVehiculo>();
         public ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
 

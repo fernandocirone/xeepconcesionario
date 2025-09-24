@@ -20,3 +20,15 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.navbar .nav-link,
+.navbar .btn-link {
+    color: #e0e0e0 !important;
+    text-decoration: none !important;
+}
+
+    .navbar .nav-link:hover,
+    .navbar .btn-link:hover {
+        color: #ffffff !important;
+        text-decoration: none !important;
+    }
