@@ -10,6 +10,16 @@
     </div>
 
     <div class="mb-3">
+        <label asp-for="TipoPlan" class="form-label"></label>
+        <select asp-for="TipoPlan" class="form-select"
+                asp-items="Html.GetEnumSelectList<xeepconcesionario.Models.TipoPlan>()">
+            <option value="">-- Seleccionar --</option>
+        </select>
+        <span asp-validation-for="TipoPlan" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
         <label asp-for="Modelo" class="form-label"></label>
         <input asp-for="Modelo" class="form-control" />
         <span asp-validation-for="Modelo" class="text-danger"></span>

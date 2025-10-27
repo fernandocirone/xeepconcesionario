@@ -9,6 +9,8 @@ namespace xeepconcesionario
         public string Codigo { get; set; } // Ej: "C60"
         public string Modelo { get; set; } // Ej: "VW Polo MSI / Fiat Cronos"
 
+        public TipoPlan? TipoPlan { get; set; }
+
         public int CuotaApertura { get; set; }        // 5 o 10
         public decimal AdelantoMensual { get; set; }  // Ej: 250000
         public decimal Sellado { get; set; }          // Ej: 100000

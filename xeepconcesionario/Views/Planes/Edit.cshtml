@@ -31,6 +31,16 @@
                                 <span asp-validation-for="Modelo" class="text-danger"></span>
                             </div>
 
+                            <div class="mb-3">
+                                <label asp-for="TipoPlan" class="form-label"></label>
+                                <select asp-for="TipoPlan" class="form-select"
+                                        asp-items="Html.GetEnumSelectList<xeepconcesionario.Models.TipoPlan>()">
+                                    <option value="">-- Seleccionar --</option>
+                                </select>
+                                <span asp-validation-for="TipoPlan" class="text-danger"></span>
+                            </div>
+
+
                             <div class="col-md-6">
                                 <label asp-for="CuotaApertura" class="form-label"></label>
                                 <input asp-for="CuotaApertura" class="form-control" type="number" step="0.01" />

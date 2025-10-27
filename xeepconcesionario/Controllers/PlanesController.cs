@@ -90,7 +90,7 @@ namespace xeepconcesionario.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PlanId,Codigo,Modelo,CuotaApertura,AdelantoMensual,Sellado,CuotaIngreso")] Plan Plan)
+        public async Task<IActionResult> Create([Bind("PlanId,Codigo,Modelo,CuotaApertura,AdelantoMensual,Sellado,CuotaIngreso,TipoPlan")] Plan Plan)
         {
 
                 _context.Add(Plan);
@@ -119,7 +119,7 @@ namespace xeepconcesionario.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PlanId,Codigo,Modelo,CuotaApertura,AdelantoMensual,Sellado,CuotaIngreso")] Plan Plan)
+        public async Task<IActionResult> Edit(int id, [Bind("PlanId,Codigo,Modelo,CuotaApertura,AdelantoMensual,Sellado,CuotaIngreso, TipoPlan")] Plan Plan)
         {
             if (id != Plan.PlanId)
             {

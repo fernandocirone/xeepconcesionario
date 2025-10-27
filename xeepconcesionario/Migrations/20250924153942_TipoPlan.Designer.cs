@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using xeepconcesionario.Data;
@@ -11,9 +12,11 @@ using xeepconcesionario.Data;
 namespace xeepconcesionario.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250924153942_TipoPlan")]
+    partial class TipoPlan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -895,7 +898,7 @@ namespace xeepconcesionario.Migrations
                     b.Property<decimal>("Sellado")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("TipoPlan")
+                    b.Property<int>("TipoPlan")
                         .HasColumnType("integer");
 
                     b.HasKey("PlanId");

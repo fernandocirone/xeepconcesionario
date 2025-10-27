@@ -5,6 +5,7 @@
         <tr>
             <th>Código</th>
             <th>Modelo</th>
+            <th>Tipo Plan</th>
             <th>Cuota Apertura</th>
             <th>Sellado 1</th>
             <th>Sellado 2</th>
@@ -17,6 +18,7 @@
             <tr class="fila-Plan" data-id="@item.PlanId" style="cursor: pointer;">
                 <td>@item.Codigo</td>
                 <td>@item.Modelo</td>
+                <td>@item.TipoPlan.ToString()</td>
                 <td>@item.CuotaApertura</td>
                 <td>@item.AdelantoMensual.ToString("C")</td>
                 <td>@item.Sellado.ToString("C")</td>
